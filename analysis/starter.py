@@ -1,16 +1,21 @@
 # Last updated: 2023-02-23
 
 
-# libs ----
+# libs -----------------------------------------------
 import requests
 import numpy as np
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy import stats
+from datetime import timedelta
 
 
-# scrape athlete data ----
+# scrape athlete data --------------------------------
+
+# TODO - functionalise or make scraped data a class
+
 parkrun_url = 'https://www.parkrun.com.au/parkrunner/'
 athlete_id = '7417035'
 
@@ -48,39 +53,67 @@ other_info = {k: re.search(v[0] + '(.*)' + v[1], page_all_results.text) \
               for k, v in other_info_map.items()}
 
 
-# visualise some of this ----
+# now let's visualise some of this
 
-all_results = scraped_tables['all_results']
 
-all_results['Run Date'] = pd.to_datetime(all_results['Run Date'], format = "%d/%m/%Y")
+# Helper functions -------------------------------
 
 def convert_time(mm_ss):
     """Helper function to convert mm:ss times to numeric"""
     return int(mm_ss.split(":")[0]) + \
         int(mm_ss.split(":")[1])/60
 
-all_results['Time'] = all_results['Time'].apply(convert_time)
+def label_point(x, y, val, ax):
+    """Helper function to add labels - assumes x axis is datetime (for Run Date)"""
+    a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
+    for i, point in a.iterrows():
+        # NOTE - assumes x axis is datetime - Run Date
+        ax.text(point['x'] + timedelta(days = 4), point['y'], str(point['val']))
 
-# polyfit
-y_vals = all_results['Time']
-x_vals = np.linspace(0, 1, len(all_results['Time']))
-# remove outliers - z-score >= 1
-rm_outliers = np.abs(stats.zscore(y_vals) < 1)
 
-z = np.polyfit(x = x_vals[rm_outliers], y = y_vals[rm_outliers], deg=1)
-p = np.poly1d(z)
-all_results['Time_trend'] = p(x_vals)
+# PLOT parkrun finish times ------------------------
 
-plt.plot(all_results['Run Date'], all_results['Time'],
-         marker = '.',
-         label = 'Recorded time')
-plt.plot(all_results['Run Date'], all_results['Time_trend'],
-         linestyle = '--',
-         color = 'grey',
-         label = 'Line of best fit')
-plt.xlabel('Run date')
-plt.ylabel('Finishing time')
-plt.title(f"Parkrun finish times for {other_info['athlete_name']}")
-ax = plt.gca()
-ax.set_ylim(ax.get_ylim()[::-1])
+def plot_finishing_times(df, athlete):
+
+    """Plots parkrun finish times over all events, from all_results table.
+       Expects Run Date to be datetime and Time_numeric column to be created"""
+    # required calcs
+    df['PB_times'] = df['Time'] \
+        [(df['Time_numeric'] == df['Time_numeric'].cummin())]
+    df['PB_times_numeric'] = df['Time_numeric'] \
+        [(df['Time_numeric'] == df['Time_numeric'].cummin())]
+
+    # build plot
+    sns.lineplot(x="Run Date", y="Time_numeric", data=all_results,
+                 linewidth=1.5, linestyle='--',
+                 color='grey', legend=False)
+    sns.scatterplot(x='Run Date', y='PB_times_numeric', data=all_results,
+                    s=120, facecolor='white', edgecolor='black', linewidth=1.5)
+    sns.scatterplot(x='Run Date', y='Time_numeric', data=all_results,
+                    hue='Event', s=80, ec=None)
+    label_point(df['Run Date'], df['PB_times_numeric'], df['PB_times'], plt.gca())
+
+    plt.xlabel('Run date')
+    plt.ylabel('Finishing time (mins)')
+    plt.legend(title='Event location')
+    plt.title(f"Parkrun finish times for {athlete}")
+    ax = plt.gca()
+    ax.set_ylim(ax.get_ylim()[::-1])
+
+    return plt
+
+## test function
+
+# get finishing times data
+all_results = scraped_tables['all_results']
+
+# format event dates and finishing times
+all_results['Run Date'] = pd.to_datetime(all_results['Run Date'], format = "%d/%m/%Y")
+all_results['Time_numeric'] = all_results['Time'].apply(convert_time)
+all_results = all_results.sort_values('Run Date')
+
+plot_finishing_times(all_results, other_info['athlete_name'])
+
+
+
 
