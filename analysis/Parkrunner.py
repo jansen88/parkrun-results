@@ -186,13 +186,13 @@ class Parkrunner():
                                         ['Run Date'] \
                                         .transform('nunique'),
                     Event = lambda x: x.Event + ' (' + x.n_event.astype('str') + ')',
-                    avg_time = lambda x: x \
+                    min_time = lambda x: x \
                                          .groupby('Event') \
                                          ['Time_numeric'] \
                                          .transform('min')
                     )
         if order_by == "time":
-            df = df.sort_values('avg_time')
+            df = df.sort_values('min_time')
         else:
             df = df.sort_values('n_event', ascending = False)
 
@@ -216,7 +216,7 @@ parkrunner = Parkrunner(athlete_id)
 
 # print(parkrunner.tables)
 # print(parkrunner.other_info)
-#
+
 parkrunner.plot_finishing_times(
     show_num_events = 25,
     # filter_parkrun = 'Rhodes',
