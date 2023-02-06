@@ -1,9 +1,11 @@
 # Last updated: 2023-02-23
-# Dev notes - returns a lot of warnings right now
+# Dev notes -
+# 1. returns a lot of warnings right now
 # Doesn't seem to break anything but probably want to look at fixing
 # e.g. posx and posy should be finite values
 # e.g. A value is trying to be set on a copy of a slice from a DataFrame.
 # Try using .loc[row_indexer,col_indexer] = value instead
+# 2. Find better function names!!!
 
 
 # libs -----------------------------------------------
@@ -115,6 +117,7 @@ class Parkrunner():
     def plot_finishing_times(self,
                              athlete = parkrunner.other_info['athlete_name'],
                              filter_parkrun = None,
+                             show_PB_only = False,
                              show_num_events = 50):
 
         """
@@ -122,6 +125,7 @@ class Parkrunner():
         :param athlete: athlete id or name to plot in title of chart
         :param show_num_events: number of events (points) to show in chart
         :param filter_parkrun: name of parkrun event to filter to
+        :param show_PB_only: filter PBs only - if parkrun filtered, shows PBs for that parkrun
         :return: Plot of parkrun finish times over all events from all_results table
         """
 
@@ -136,6 +140,10 @@ class Parkrunner():
             [(df['Time_numeric'] == df['Time_numeric'].cummin())]
         df['PB_times_numeric'] = df['Time_numeric'] \
             [(df['Time_numeric'] == df['Time_numeric'].cummin())]
+
+        # filter PB only
+        if show_PB_only:
+            df = df[df.Time == df.PB_times]
 
         # subset after PB calcs
         df = df.tail(show_num_events)
@@ -158,6 +166,46 @@ class Parkrunner():
         ax.set_ylim(ax.get_ylim()[::-1])
 
         return plt #, df
+
+    def plot_boxplot_times_by_event(self, order_by = "time"):
+
+        """
+        :param order_by: Order y axis by - accepted arguments 'events' and 'time'
+        :return: Boxplot of finishing times by event
+        """
+
+        if order_by not in ["events", "time"]:
+            raise ValueError("Input argument `order_by` not in accepted arguments - 'events', 'time'.")
+
+        df = self.tables['all_results']
+
+        # add participation count to Event y axis label, get n_event and avg_time to order by
+        df = df \
+            .assign(n_event = lambda x: x \
+                                        .groupby('Event') \
+                                        ['Run Date'] \
+                                        .transform('nunique'),
+                    Event = lambda x: x.Event + ' (' + x.n_event.astype('str') + ')',
+                    avg_time = lambda x: x \
+                                         .groupby('Event') \
+                                         ['Time_numeric'] \
+                                         .transform('min')
+                    )
+        if order_by == "time":
+            df = df.sort_values('avg_time')
+        else:
+            df = df.sort_values('n_event', ascending = False)
+
+        sns.boxplot(data = df,
+                    x = 'Time_numeric',
+                    y = 'Event')
+        plt.xlabel('Finish times')
+        plt.ylabel('Parkrun location (participation count)')
+        plt.title('Parkrun finish times by event location')
+        plt.tight_layout()
+
+        return plt
+
 # END Parkrun class
 
 
@@ -166,13 +214,17 @@ class Parkrunner():
 athlete_id = '7417035'
 parkrunner = Parkrunner(athlete_id)
 
-print(parkrunner.tables)
-print(parkrunner.other_info)
-
+# print(parkrunner.tables)
+# print(parkrunner.other_info)
+#
 parkrunner.plot_finishing_times(
     show_num_events = 25,
-    filter_parkrun = 'Rhodes'
+    # filter_parkrun = 'Rhodes',
+    show_PB_only = True
 )
+
+parkrunner.plot_boxplot_times_by_event(order_by = "time")
+
 
 
 
