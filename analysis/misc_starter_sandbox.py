@@ -1,3 +1,4 @@
+# Intial dev code dump - moved to Parkrunner.py as a class
 # Last updated: 2023-02-23
 
 
