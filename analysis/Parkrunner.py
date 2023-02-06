@@ -115,7 +115,6 @@ class Parkrunner():
 
     # Plot output ----
     def plot_finishing_times(self,
-                             athlete = parkrunner.other_info['athlete_name'],
                              filter_parkrun = None,
                              show_PB_only = False,
                              show_num_events = 50):
@@ -161,7 +160,7 @@ class Parkrunner():
         plt.xlabel('Run date')
         plt.ylabel('Finishing time (mins)')
         plt.legend(title='Event location')
-        plt.title(f"Parkrun finish times for {athlete}")
+        plt.title(f"Parkrun finish times")
         ax = plt.gca()
         ax.set_ylim(ax.get_ylim()[::-1])
 
