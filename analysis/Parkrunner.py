@@ -1,4 +1,4 @@
-# Last updated: 2023-02-23
+# Last updated: 2023-03-07
 # Dev notes -
 # 1. returns a lot of warnings right now
 # Doesn't seem to break anything but probably want to look at fixing
@@ -17,19 +17,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 from datetime import timedelta
-
-# helper functions -----------------------------------
-def convert_time(mm_ss):
-    """Helper function to convert mm:ss times to numeric"""
-    return int(mm_ss.split(":")[0]) + \
-        int(mm_ss.split(":")[1])/60
-
-def label_point(x, y, val, ax):
-    """Helper function to add labels - assumes x axis is datetime (for Run Date)"""
-    a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
-    for i, point in a.iterrows():
-        # NOTE - assumes x axis is datetime - Run Date
-        ax.text(point['x'] + timedelta(days = 4), point['y'], str(point['val']))
 
 
 # class for athlete data -----------------------------
@@ -204,6 +191,19 @@ class Parkrunner():
         plt.tight_layout()
 
         return plt
+
+    # helper functions -----
+    def convert_time(mm_ss):
+        """Helper function to convert mm:ss times to numeric"""
+        return int(mm_ss.split(":")[0]) + \
+               int(mm_ss.split(":")[1]) / 60
+
+    def label_point(x, y, val, ax):
+        """Helper function to add labels - assumes x axis is datetime (for Run Date)"""
+        a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
+        for i, point in a.iterrows():
+            # NOTE - assumes x axis is datetime - Run Date
+            ax.text(point['x'] + timedelta(days=4), point['y'], str(point['val']))
 
 # END Parkrun class
 
