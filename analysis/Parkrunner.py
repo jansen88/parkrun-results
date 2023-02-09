@@ -16,8 +16,8 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-from datetime import timedelta
-
+import datetime
+from itertools import product
 
 # class for athlete data -----------------------------
 class Parkrunner():
@@ -64,7 +64,7 @@ class Parkrunner():
         # clean tables
         all_results = scraped_tables['all_results']
         all_results['Run Date'] = pd.to_datetime(all_results['Run Date'], format="%d/%m/%Y")
-        all_results['Time_numeric'] = all_results['Time'].apply(convert_time)
+        all_results['Time_numeric'] = all_results['Time'].apply(self._convert_time)
         all_results = all_results.sort_values('Run Date')
 
         # update with cleaned table
@@ -142,7 +142,7 @@ class Parkrunner():
                         s=120, facecolor='white', edgecolor='black', linewidth=1.5)
         sns.scatterplot(x='Run Date', y='Time_numeric', data=df,
                         hue='Event', s=80, ec=None)
-        label_point(df['Run Date'], df['PB_times_numeric'], df['PB_times'], plt.gca())
+        self._label_point(df['Run Date'], df['PB_times_numeric'], df['PB_times'], plt.gca())
 
         plt.xlabel('Run date')
         plt.ylabel('Finishing time (mins)')
@@ -192,13 +192,14 @@ class Parkrunner():
 
         return plt
 
+
     # helper functions -----
-    def convert_time(mm_ss):
+    def _convert_time(self, mm_ss):
         """Helper function to convert mm:ss times to numeric"""
         return int(mm_ss.split(":")[0]) + \
                int(mm_ss.split(":")[1]) / 60
 
-    def label_point(x, y, val, ax):
+    def _label_point(self, x, y, val, ax):
         """Helper function to add labels - assumes x axis is datetime (for Run Date)"""
         a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
         for i, point in a.iterrows():
@@ -223,6 +224,45 @@ parkrunner.plot_finishing_times(
 )
 
 parkrunner.plot_boxplot_times_by_event(order_by = "time")
+
+
+# plot heatmap of monthly parkrun attendance ----
+participation = parkrunner.tables['all_results'] \
+                    .assign(
+                            year = lambda x: x["Run Date"].dt.year,
+                            month_int =lambda x: x["Run Date"].dt.month,
+                            month = lambda x: x["Run Date"].dt.month_name()
+                        )
+
+# create mapping table of all year/months to ensure completeness if no participation in some months
+run_dates = parkrunner.tables['all_results']['Run Date']
+
+years = pd.DataFrame({"year": run_dates.dt.year.unique()})
+list_months = ["January", "February", "March", "April", "May", "June", "July", "August",
+             "September", "October", "November", "December"]
+months = pd.DataFrame({"month": list_months,
+                       "month_int": list(range(1,13))})
+all_dates = years.merge(months, how = 'cross')
+
+# count attendance
+participation = all_dates \
+    .merge(participation, how = "left") \
+    .groupby(['year', 'month', 'month_int']) \
+    .agg(count=('Run Date', 'nunique')) \
+    .sort_values(['year', 'month_int']) \
+    .reset_index()
+
+# pivot for heatmap
+participation = participation \
+    .pivot(index = ["month_int", "month"], columns = "year", values = "count") \
+    .reset_index("month_int") \
+    .drop("month_int", axis = 1)
+
+sns.heatmap(participation, vmin = 0, vmax = 6, cmap = 'rocket_r', annot = True)
+plt.xlabel('Month')
+plt.ylabel('Year')
+plt.title('Parkrun attendance by year/month')
+plt.tight_layout()
 
 
 
