@@ -16,20 +16,27 @@ from datetime import timedelta
 class Parkrun():
     """Scrapes data from parkrun results page and returns data and charts"""
 
-    def __init__(self, parkrun_event_name):
+    def __init__(self, parkrun_url_name):
 
-        # FIXME - this is really the name in the url, not the actual event name - e.g. 'theponds' not "The Ponds"
-        self.event_name = parkrun_event_name
+        # NOTE - this is really the name in the url, not the actual event name - e.g. 'theponds' not "The Ponds"
+        self.event_url_name = parkrun_url_name
+
 
         self.raw_latest_results = self.scrape_latest_results()
-
         self.latest_results = self.collect_latest_results(raw_results = self.raw_latest_results)
+
+        # Fetch actual parkrun name from raw
+        self.event_name = re.search("<title>results \|" + '(.*)' + "parkrun</title>",
+                                    self.raw_latest_results.text) \
+                        .group(1) \
+                        .strip()
+
 
     # Data scraping / collecting ----
     def scrape_latest_results(self):
         parkrun_url = 'https://www.parkrun.com.au/'
 
-        latest_results_url = parkrun_url + self.event_name + '/results/latestresults/'
+        latest_results_url = parkrun_url + self.event_url_name + '/results/latestresults/'
 
         page_all_results = requests.get(latest_results_url, headers={
             'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
@@ -65,6 +72,16 @@ class Parkrun():
             else:
                 return s[:7]
 
+        def get_time(s):
+            """Helper function to get finish time"""
+            if pd.isna(s):
+                return np.nan
+            elif s[1] == ":":
+                # e.g. 1:12:56
+                return '59:59'
+            else:
+                return s[:5]
+
         def get_pb(s):
             """Helper function to extract PB from last results"""
             # handle na
@@ -72,10 +89,10 @@ class Parkrun():
                 return np.nan
             # new pb or first timer - take current time
             elif 'New PB!' in s or 'First Timer' in s:
-                return s[:5]
+                return get_time(s[:5])
             # otherwise, take existing PB
             else:
-                return s[-5:]
+                return get_time(s[-5:])
 
         def convert_time(mm_ss):
             """Helper function to convert mm:ss times to numeric"""
@@ -84,6 +101,7 @@ class Parkrun():
             else:
                 return int(mm_ss.split(":")[0]) + \
                        int(mm_ss.split(":")[1]) / 60
+
 
         # Clean raw data
         results = \
@@ -109,10 +127,7 @@ class Parkrun():
 
                 # extract from results.Time
                 # e.g. 16:37PB15:58, 17:05New PB!
-                # WARNING - assumes times xx:xx
-                # FIXME - doesnt handle over 1 hour correctly
-                finish_time=lambda x: x.Time \
-                    .apply(lambda s: s[:5] if not pd.isna(s) else np.nan),
+                finish_time=lambda x: x.Time.apply(get_time),
                 curr_pb=lambda x: x.Time.apply(get_pb)
             ) \
                 .rename(columns={'Position': 'position',
@@ -177,20 +192,6 @@ class Parkrun():
         return plt
 
 
-# plots -------------------------------
-
-# plot times
-
-
-
-
-
-# boxplot of times
-
-
-
-
-
 # performance vs pb -- scrapped, this doesn't work great if we can't get previous pb
 
 # df['pb_diff'] = df.curr_pb_numeric - df.finish_time_numeric
@@ -207,6 +208,7 @@ print(parkrun.latest_results)
 
 parkrun.plot_dist_finish_times(
     by_gender = True
+    # by_gender = False
 )
 
 parkrun.plot_boxplot_finish_times(
