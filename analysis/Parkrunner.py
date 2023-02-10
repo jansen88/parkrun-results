@@ -192,6 +192,54 @@ class Parkrunner():
 
         return plt
 
+    def plot_heatmap_mthly_attendance(self):
+        """
+        :return: Heatmap of attendance count by year / month
+        """
+
+        def tag_year_month(df, date_col):
+            """ Helper function for this heatmap - assign year / month"""
+            return df \
+                .assign(year=lambda x: x[date_col].dt.year,
+                        month_int=lambda x: x[date_col].dt.month,
+                        month=lambda x: x[date_col].dt.month_name())
+
+        # tag parkrunner run dates with year/month
+        participation = tag_year_month(df = parkrunner.tables['all_results'],
+                                       date_col = "Run Date")
+        run_dates = parkrunner.tables['all_results']['Run Date']
+
+        # create mapping table of all year/months to ensure completeness if no participation in some months
+        dates = pd.date_range(run_dates.min().replace(day=1),  # floor first date
+                              datetime.datetime.now(),
+                              freq='MS')
+        all_dates = tag_year_month(df = pd.DataFrame({"dates": dates}),
+                                   date_col = "dates")
+
+        # count attendance
+        participation = all_dates \
+            .merge(participation, how = "left") \
+            .groupby(['year', 'month', 'month_int']) \
+            .agg(count=('Run Date', 'nunique')) \
+            .sort_values(['year', 'month_int']) \
+            .reset_index()
+
+        # pivot for heatmap
+        participation = participation \
+            .pivot(index=["month_int", "month"], columns="year", values="count") \
+            .reset_index("month_int") \
+            .drop("month_int", axis=1)
+
+        # plot heatmap
+        sns.heatmap(participation, vmin=0, vmax=6, cmap='rocket_r', annot=True,
+                    cbar_kws={'label': 'Number of parkruns'})
+        plt.xlabel('Month')
+        plt.ylabel('Year')
+        plt.title('Parkrun attendance by year/month')
+        plt.tight_layout()
+
+        return plt
+
 
     # helper functions -----
     def _convert_time(self, mm_ss):
@@ -204,14 +252,14 @@ class Parkrunner():
         a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
         for i, point in a.iterrows():
             # NOTE - assumes x axis is datetime - Run Date
-            ax.text(point['x'] + timedelta(days=4), point['y'], str(point['val']))
+            ax.text(point['x'] + datetime.timedelta(days=4), point['y'], str(point['val']))
 
 # END Parkrun class
 
 
 # test  --------------------------------------------
 
-athlete_id = '7417035'
+athlete_id = '2587116'
 parkrunner = Parkrunner(athlete_id)
 
 # print(parkrunner.tables)
@@ -223,46 +271,12 @@ parkrunner.plot_finishing_times(
     show_PB_only = True
 )
 
-parkrunner.plot_boxplot_times_by_event(order_by = "time")
+parkrunner.plot_boxplot_times_by_event(
+    order_by = "time"
+)
 
+parkrunner.plot_heatmap_mthly_attendance()
 
-# plot heatmap of monthly parkrun attendance ----
-participation = parkrunner.tables['all_results'] \
-                    .assign(
-                            year = lambda x: x["Run Date"].dt.year,
-                            month_int =lambda x: x["Run Date"].dt.month,
-                            month = lambda x: x["Run Date"].dt.month_name()
-                        )
-
-# create mapping table of all year/months to ensure completeness if no participation in some months
-run_dates = parkrunner.tables['all_results']['Run Date']
-
-years = pd.DataFrame({"year": run_dates.dt.year.unique()})
-list_months = ["January", "February", "March", "April", "May", "June", "July", "August",
-             "September", "October", "November", "December"]
-months = pd.DataFrame({"month": list_months,
-                       "month_int": list(range(1,13))})
-all_dates = years.merge(months, how = 'cross')
-
-# count attendance
-participation = all_dates \
-    .merge(participation, how = "left") \
-    .groupby(['year', 'month', 'month_int']) \
-    .agg(count=('Run Date', 'nunique')) \
-    .sort_values(['year', 'month_int']) \
-    .reset_index()
-
-# pivot for heatmap
-participation = participation \
-    .pivot(index = ["month_int", "month"], columns = "year", values = "count") \
-    .reset_index("month_int") \
-    .drop("month_int", axis = 1)
-
-sns.heatmap(participation, vmin = 0, vmax = 6, cmap = 'rocket_r', annot = True)
-plt.xlabel('Month')
-plt.ylabel('Year')
-plt.title('Parkrun attendance by year/month')
-plt.tight_layout()
 
 
 
