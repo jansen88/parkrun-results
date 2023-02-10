@@ -1,8 +1,6 @@
 # Last updated: 2023-03-10
 # Dev notes -
 # 1. returns a lot of warnings right now
-# Doesn't seem to break anything but probably want to look at fixing
-# e.g. posx and posy should be finite values
 # e.g. A value is trying to be set on a copy of a slice from a DataFrame.
 # Try using .loc[row_indexer,col_indexer] = value instead
 # 2. Find better function names!!!
@@ -133,6 +131,8 @@ class Parkrunner():
 
         # subset after PB calcs
         df = df.tail(show_num_events)
+        df_pb = df[~pd.isnull(df.PB_times_numeric)]
+
 
         # build plot
         sns.lineplot(x="Run Date", y="Time_numeric", data=df,
@@ -142,7 +142,7 @@ class Parkrunner():
                         s=120, facecolor='white', edgecolor='black', linewidth=1.5)
         sns.scatterplot(x='Run Date', y='Time_numeric', data=df,
                         hue='Event', s=80, ec=None)
-        self._label_point(df['Run Date'], df['PB_times_numeric'], df['PB_times'], plt.gca())
+        self._label_point(df_pb['Run Date'], df_pb['PB_times_numeric'], df_pb['PB_times'], plt.gca())
 
         plt.xlabel('Run date')
         plt.ylabel('Finishing time (mins)')
@@ -205,9 +205,9 @@ class Parkrunner():
                         month=lambda x: x[date_col].dt.month_name())
 
         # tag parkrunner run dates with year/month
-        participation = tag_year_month(df = parkrunner.tables['all_results'],
+        participation = tag_year_month(df = self.tables['all_results'],
                                        date_col = "Run Date")
-        run_dates = parkrunner.tables['all_results']['Run Date']
+        run_dates = self.tables['all_results']['Run Date']
 
         # create mapping table of all year/months to ensure completeness if no participation in some months
         dates = pd.date_range(run_dates.min().replace(day=1),  # floor first date
@@ -259,23 +259,23 @@ class Parkrunner():
 
 # test  --------------------------------------------
 
-athlete_id = '2587116'
-parkrunner = Parkrunner(athlete_id)
+# athlete_id = '2587116'
+# parkrunner = Parkrunner(athlete_id)
 
-# print(parkrunner.tables)
-# print(parkrunner.other_info)
+# # print(parkrunner.tables)
+# # print(parkrunner.other_info)
 
-parkrunner.plot_finishing_times(
-    show_num_events = 25,
-    # filter_parkrun = 'Rhodes',
-    show_PB_only = True
-)
+# parkrunner.plot_finishing_times(
+#     show_num_events = 25,
+#     # filter_parkrun = 'Rhodes',
+#     show_PB_only = True
+# )
 
-parkrunner.plot_boxplot_times_by_event(
-    order_by = "time"
-)
+# parkrunner.plot_boxplot_times_by_event(
+#     order_by = "time"
+# )
 
-parkrunner.plot_heatmap_mthly_attendance()
+# parkrunner.plot_heatmap_mthly_attendance()
 
 
 

@@ -12,7 +12,7 @@ from scipy import stats
 from datetime import timedelta
 
 
-# class for parkrun event
+# class for parkrun event ----------------------------
 class Parkrun():
     """Scrapes data from parkrun results page and returns data and charts"""
 
@@ -200,19 +200,19 @@ class Parkrun():
 #                 y = 'pb_diff')
 
 
-# test -------------------------
-parkrun = Parkrun("theponds")
+# # test -------------------------
+# parkrun = Parkrun("theponds")
 
-print(parkrun.event_name)
-print(parkrun.latest_results)
+# print(parkrun.event_name)
+# print(parkrun.latest_results)
 
-parkrun.plot_dist_finish_times(
-    by_gender = True
-    # by_gender = False
-)
+# parkrun.plot_dist_finish_times(
+#     by_gender = True
+#     # by_gender = False
+# )
 
-parkrun.plot_boxplot_finish_times(
-    by = "age_group"
-    # by = "gender"
-)
+# parkrun.plot_boxplot_finish_times(
+#     by = "age_group"
+#     # by = "gender"
+# )
 
