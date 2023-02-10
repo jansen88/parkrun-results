@@ -1,2 +1,5 @@
 # parkrunFun
-Fun in-progress repository for scraping and visualising parkrun results
+Small working repository for scraping and visualising parkrun results
+
+### Examples
+See demo/demo.ipynb for example output
