@@ -135,6 +135,8 @@ class Parkrunner():
 
 
         # build plot
+        fig = plt.figure()
+
         sns.lineplot(x="Run Date", y="Time_numeric", data=df,
                      linewidth=1.5, linestyle='--',
                      color='grey', legend=False)
@@ -151,7 +153,7 @@ class Parkrunner():
         ax = plt.gca()
         ax.set_ylim(ax.get_ylim()[::-1])
 
-        return plt #, df
+        return fig #, df
 
     def plot_boxplot_times_by_event(self, order_by = "time"):
 
@@ -182,6 +184,9 @@ class Parkrunner():
         else:
             df = df.sort_values('n_event', ascending = False)
 
+
+        fig = plt.figure()
+
         sns.boxplot(data = df,
                     x = 'Time_numeric',
                     y = 'Event')
@@ -190,7 +195,7 @@ class Parkrunner():
         plt.title('Parkrun finish times by event location')
         plt.tight_layout()
 
-        return plt
+        return fig
 
     def plot_heatmap_mthly_attendance(self):
         """
@@ -231,6 +236,8 @@ class Parkrunner():
             .drop("month_int", axis=1)
 
         # plot heatmap
+        fig = plt.figure()
+
         sns.heatmap(participation, vmin=0, vmax=6, cmap='rocket_r', annot=True,
                     cbar_kws={'label': 'Number of parkruns'})
         plt.xlabel('Month')
@@ -238,7 +245,7 @@ class Parkrunner():
         plt.title('Parkrun attendance by year/month')
         plt.tight_layout()
 
-        return plt
+        return fig
 
 
     # helper functions -----
