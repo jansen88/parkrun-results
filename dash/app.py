@@ -30,7 +30,7 @@ app = Dash(__name__,
                     "referrerpolicy": "no-referrer"
                 }]
         )
-app.title = "Parkrun Fun"
+app.title = "Parkrun Dash"
 
 
 # UI ----
@@ -69,7 +69,7 @@ header = html.Div(
     [
         html.Div(html.I(className = "fa-solid fa-person-running", style = {"font-size": "30px", "padding-right":"10px"}), 
                  style={'display': 'inline-block'}),
-        html.Div(html.H3('Parkrun Fun', style = {"vertical-align": "middle"}),
+        html.Div(html.H3('Parkrun Dash', style = {"vertical-align": "middle"}),
                  style={'display': 'inline-block'})
         
     ], 
@@ -85,21 +85,54 @@ sidebar = html.Div(
 
 content = html.Div(
     [
-        dbc.Label("Parkrunner to look up:"),
+        html.H3('🏃 Parkrunner profile'),
+        html.P(""), 
+
+        dbc.Label("Athlete to look up:"),
         dbc.Input(id="input_athlete_id",
                   placeholder="Athlete ID e.g. 7417035", size="lg"),
+        html.P(""), 
         html.Button('Search', id='input_ok_athlete_id', n_clicks=0),
 
-        html.Div(id='output_name'),
-        html.Div(id='output_age_category'),
-        html.Div(id='output_nbr_parkruns'),
+        html.Hr(),
+        html.P(""),
 
-        html.Div(id='output_summary_stats'),
-        html.Div(id='output_recent_parkruns'),
-
-        html.Img(id='output_finishing_times'),
-        html.Img(id='output_boxplot_times'),
-        html.Img(id='output_heatmap_attendance')
+        dbc.Row(
+            [
+                dbc.Col([
+                    dbc.Card(
+                    dbc.CardBody([
+                        html.H4(id='output_name'),
+                        html.Div(id='output_age_category'),
+                        html.Div(id='output_nbr_parkruns'),
+                        html.P(""),
+                        
+                        dbc.Label("Summary stats - all time"),
+                        html.Div(id='output_summary_stats'),
+                        html.P(""),
+                        dbc.Label("Most recent results"),
+                        html.Div(id='output_recent_parkruns')
+                        ])
+                    ),
+                    html.P("")
+                ]),
+                dbc.Col([
+                        dbc.Card(
+                            dbc.Tabs([
+                                dbc.Tab([
+                                    html.Img(id='output_finishing_times')
+                                ], label = "Finishing times"),
+                                dbc.Tab([
+                                    html.Img(id='output_boxplot_times')
+                                ], label = "Top parkrun locations"),
+                                dbc.Tab([
+                                    html.Img(id='output_heatmap_attendance')
+                                ], label = "Parkrun attendance")
+                            ])
+                        )
+                ])
+            ]
+        )
     ],
     style = CONTENT_STYLE
 )
@@ -140,21 +173,27 @@ def get_athlete_details(athlete_id, button):
     nbr_parkruns = f'Total parkrun attendances: {info["nbr_parkruns"]}'
 
     # Tables
+    def pd_df_to_dash_table(df):
+        return dash_table.DataTable(
+            # to json
+            data = df.to_dict(orient='rows'),
+            columns = [{"name": i, "id": i} for i in df.columns],
+            # formatting
+            style_data={'color': 'black', 'backgroundColor': 'white'},
+            style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(220, 220, 220)'}],
+            style_header={'backgroundColor': 'rgb(210, 210, 210)', 'color': 'black', 'fontWeight': 'bold'},
+            style_cell={'font-family':"Segoe UI"}
+        )
+
     summary_stats = parkrunner.tables['summary_stats']
-    tbl_summary_stats = dash_table.DataTable(
-        data = summary_stats.to_dict('rows'),
-        columns = [{"name": i, "id": i} for i in summary_stats.columns]
-    )
+    tbl_summary_stats = pd_df_to_dash_table(summary_stats)
 
     recent_N = 5
     recent_parkruns = parkrunner.tables['all_results'] \
         [["Event", "Run Date", "Pos", "Time", "Age Grade"]] \
         .sort_values("Run Date", ascending = False) \
         .head(recent_N) 
-    tbl_recent_parkruns = dash_table.DataTable(
-        data = recent_parkruns.to_dict('rows'),
-        columns = [{"name": i, "id": i} for i in recent_parkruns.columns]
-    )
+    tbl_recent_parkruns = pd_df_to_dash_table(recent_parkruns)
 
 
     # Charts
