@@ -64,6 +64,8 @@ class Parkrunner():
         all_results['Run Date'] = pd.to_datetime(all_results['Run Date'], format="%d/%m/%Y")
         all_results['Time_numeric'] = all_results['Time'].apply(self._convert_time)
         all_results = all_results.sort_values('Run Date')
+        all_results['Parkrun Number'] = all_results['Run Date'].rank(ascending=True).astype('int')
+        all_results.rename({"Pos": "Position"}, axis=1, inplace=True)
 
         # update with cleaned table
         scraped_tables['all_results'] = all_results
