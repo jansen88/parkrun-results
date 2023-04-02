@@ -39,6 +39,7 @@ app.title = "Parkrun Dash"
 # UI ----
 header_height = "4rem"
 sidebar_width = "12vw"
+parkrun_purple = "#2b233d"
 
 HEADER_STYLE = {
     "position": "fixed",
@@ -47,7 +48,7 @@ HEADER_STYLE = {
     "right": 0,
     "height": header_height,
     "padding": "1rem 1rem",
-    "background-color": "#2b233d",  # parkrun purple
+    "background-color": parkrun_purple,
     "color": "#FFFFFF"
 }
 
@@ -100,8 +101,8 @@ summary_tab = [
              style={'width': '45%'}),
     html.P(""),
     html.Div(id='output_recent_parkruns',
-             style={'width': '70%',
-                    'maxHeight': '400px'#,
+             style={'width': '80%'#,
+                    #'maxHeight': '400px'#,
                     #'overflowY': 'auto'
                     })
 ]
@@ -110,22 +111,28 @@ content = html.Div(
     [
         html.H4('🏃 Parkrunner profile'),
         html.P(""),
-
-        dbc.Label("Athlete to look up:"),
-        dbc.Input(id="input_athlete_id",
-                  placeholder="Athlete ID e.g. 7417035",
-                  style={"width": "700px"}),
-        html.P(""),
-        html.Button('Search', id='input_ok_athlete_id', n_clicks=0),
-
         html.Hr(),
-        html.P(""),
 
-        dbc.Row(
-            [
-                dbc.Col([
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    html.H6("🔎 Parkrunner"),
+                    dbc.Label("Search for parkrunner:"),
+                    dbc.Input(id="input_athlete_id",
+                            placeholder="Athlete ID e.g. 7417035",
+                            style={"width": "400px"}),
+                    html.P(""),
+                    html.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
+                                style={"width": "100px"})
+                ], style={"width": "90%", "padding": "20px", 'min-height':'35vh'}
+                )
+            ], width=4),
+
+            dbc.Col([
+                dbc.Card([
                     dcc.Loading(
                         children=[
+                            html.H6("📊 Results"),
                             dbc.Tabs([
                                 dbc.Tab(summary_tab,
                                         label="Summary"),
@@ -143,11 +150,12 @@ content = html.Div(
                             dcc.Store(id='store_parkrunner', data=None)
                         ],
                         type="circle",
-                        style={"width": "20rem", "height": "20rem", "padding-top": "50vh"}
-                    ),
-                ], width=12)
-            ]
-        )
+                        color=parkrun_purple,
+                        style={"width": "20rem", "height": "20rem", "padding-top": "30vh"}
+                    )
+                ], style={"width": "90%", "padding": "20px",'min-height':'50vh'})
+            ], width=8)
+        ])
     ],
     style=CONTENT_STYLE
 )
