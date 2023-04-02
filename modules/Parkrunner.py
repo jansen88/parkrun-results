@@ -17,6 +17,9 @@ from scipy import stats
 import datetime
 from itertools import product
 
+import plotly.express as px
+import plotly.graph_objs as go
+
 # class for athlete data -----------------------------
 class Parkrunner():
     """ Scrapes athlete data from athlete_id and returns data and charts """
@@ -141,27 +144,37 @@ class Parkrunner():
         df = df.tail(show_num_events)
         df_pb = df[~pd.isnull(df.PB_times_numeric)]
 
+        ### build plot - ty chatgpt for converting from matplotlib
 
-        # build plot
-        fig = plt.figure()
+        # Create color map
+        color_map = {event: color for event, color in zip(df['Event'].unique(), px.colors.qualitative.Dark24)}
 
-        sns.lineplot(x="Run Date", y="Time_numeric", data=df,
-                     linewidth=1.5, linestyle='--',
-                     color='grey', legend=False)
-        sns.scatterplot(x='Run Date', y='PB_times_numeric', data=df,
-                        s=120, facecolor='white', edgecolor='black', linewidth=1.5)
-        sns.scatterplot(x='Run Date', y='Time_numeric', data=df,
-                        hue='Event', s=80, ec=None)
-        self._label_point(df_pb['Run Date'], df_pb['PB_times_numeric'], df_pb['PB_times'], plt.gca())
+        # Create scatter plot of all data
+        scatter = px.scatter(df, x='Run Date', y='Time_numeric', color='Event', color_discrete_map=color_map,
+                             labels={'Time': 'Finishing time', 'Run Date': 'Parkrun date'},
+                             hover_data={'Event': True, 'Time': True, "Time_numeric": False})
+        scatter.update_traces(marker=dict(size=12))
 
-        plt.xlabel('Run date')
-        plt.ylabel('Finishing time (mins)')
-        plt.legend(title='Event location')
-        plt.title(f"Parkrun finish times")
-        ax = plt.gca()
-        ax.set_ylim(ax.get_ylim()[::-1])
+        # Add a dotted line through all the points
+        scatter.add_trace(go.Scatter(x=df['Run Date'], y=df['Time_numeric'], mode='lines', line=dict(dash='dot'),
+                                     name="Trend"))
 
-        return fig #, df
+        # Add a circle border around personal best time data points
+        pb_points = df.loc[df['Time_numeric'] == df['PB_times_numeric']]
+        scatter.add_trace(go.Scatter(x=pb_points['Run Date'], y=pb_points['Time_numeric'],
+                                     mode='markers',
+                                     marker=dict(symbol='circle-open', size=18, line=dict(color='black', width=2)),
+                                     hoverinfo='text',
+                                     text=pb_points['Event'],
+                                     name='Personal best'
+                                    ))
+
+        scatter.update_layout(yaxis=dict(scaleanchor="x", scaleratio=1, autorange='reversed'),
+                                  xaxis_title="Parkrun date", yaxis_title="Finishing time (mins)")
+
+        scatter.show()
+
+        return scatter
 
     def plot_boxplot_times_by_event(self, order_by = "time"):
 
@@ -291,6 +304,27 @@ class Parkrunner():
 # )
 
 # parkrunner.plot_heatmap_mthly_attendance()
+
+
+# temp archive ---
+        # # build plot
+        # fig = plt.figure()
+
+        # sns.lineplot(x="Run Date", y="Time_numeric", data=df,
+        #              linewidth=1.5, linestyle='--',
+        #              color='grey', legend=False)
+        # sns.scatterplot(x='Run Date', y='PB_times_numeric', data=df,
+        #                 s=120, facecolor='white', edgecolor='black', linewidth=1.5)
+        # sns.scatterplot(x='Run Date', y='Time_numeric', data=df,
+        #                 hue='Event', s=80, ec=None)
+        # self._label_point(df_pb['Run Date'], df_pb['PB_times_numeric'], df_pb['PB_times'], plt.gca())
+
+        # plt.xlabel('Run date')
+        # plt.ylabel('Finishing time (mins)')
+        # plt.legend(title='Event location')
+        # plt.title(f"Parkrun finish times")
+        # ax = plt.gca()
+        # ax.set_ylim(ax.get_ylim()[::-1])
 
 
 

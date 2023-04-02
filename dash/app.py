@@ -137,7 +137,7 @@ content = html.Div(
                                 dbc.Tab(summary_tab,
                                         label="Summary"),
                                 dbc.Tab([
-                                    html.Img(id='output_finishing_times')
+                                    dcc.Graph(id='output_finishing_times')
                                 ], label="Finishing times"),
                                 dbc.Tab([
                                     html.Img(id='output_boxplot_times')
@@ -199,7 +199,7 @@ def update_parkrunner(n_clicks, athlete_id):
     Output('output_summary_stats', 'children'),
     Output('output_recent_parkruns', 'children'),
 
-    Output('output_finishing_times', 'src'),
+    Output('output_finishing_times', 'figure'),
     Output('output_boxplot_times', 'src'),
     Output('output_heatmap_attendance', 'src'),
 
@@ -282,7 +282,7 @@ def update_outputs(ts, encoded_parkrunner):
                     return "data:image/png;base64,{}".format(data)
 
                 fig_finishing_times = parkrunner.plot_finishing_times(show_num_events=25)
-                fig_finishing_times = matplotlib_to_img(fig_finishing_times)
+                # fig_finishing_times = matplotlib_to_img(fig_finishing_times)
 
                 fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
                 fig_boxplot_times = matplotlib_to_img(fig_boxplot_times)
