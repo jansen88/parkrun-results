@@ -67,8 +67,14 @@ class Parkrunner():
         all_results['Parkrun Number'] = all_results['Run Date'].rank(ascending=True).astype('int')
         all_results.rename({"Pos": "Position"}, axis=1, inplace=True)
 
+        # extra cleaning for download
+        all_results_dld = all_results[["Parkrun Number", "Event", "Run Date", "Position", "Time", "Age Grade"]] \
+            .sort_values("Run Date", ascending=False)
+        all_results_dld["Run Date"] = all_results_dld["Run Date"].apply(lambda x: x.date())
+
         # update with cleaned table
         scraped_tables['all_results'] = all_results
+        scraped_tables['all_results_dld'] = all_results_dld
 
         return scraped_tables
 
