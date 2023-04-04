@@ -113,6 +113,8 @@ class Parkrunner():
     def plot_finishing_times(self,
                              filter_parkrun = None,
                              show_PB_only = False,
+                             filter_start = pd.Timestamp.min,
+                             filter_end = pd.Timestamp.max,
                              show_num_events = 50):
 
         """
@@ -136,6 +138,9 @@ class Parkrunner():
         df['PB_times_numeric'] = df['Time_numeric'] \
             [(df['Time_numeric'] == df['Time_numeric'].cummin())]
 
+        # filter dates
+        df = df[df["Run Date"].between(filter_start, filter_end)]
+
         # filter PB only
         if show_PB_only:
             df = df[df.Time == df.PB_times]
@@ -156,23 +161,74 @@ class Parkrunner():
         scatter.update_traces(marker=dict(size=12))
 
         # Add a dotted line through all the points
-        scatter.add_trace(go.Scatter(x=df['Run Date'], y=df['Time_numeric'], mode='lines', line=dict(dash='dot'),
-                                     name="Trend"))
+        scatter.add_trace(go.Scatter(x=df['Run Date'], y=df['Time_numeric'],
+                                     mode='lines',
+                                     line=dict(color='DarkSlateGrey', dash='dot'),
+                                     name="Trend",
+                                     showlegend=False))
 
         # Add a circle border around personal best time data points
         pb_points = df.loc[df['Time_numeric'] == df['PB_times_numeric']]
         scatter.add_trace(go.Scatter(x=pb_points['Run Date'], y=pb_points['Time_numeric'],
                                      mode='markers',
-                                     marker=dict(symbol='circle-open', size=18, line=dict(color='black', width=2)),
+                                     marker=dict(symbol='circle-open',
+                                                 size=18,
+                                                 line=dict(width=2),
+                                                 color="DarkSlateGrey"),
                                      hoverinfo='text',
                                      text=pb_points['Event'],
-                                     name='Personal best'
-                                    ))
+                                     name='Personal best'))
 
-        scatter.update_layout(yaxis=dict(scaleanchor="x", scaleratio=1, autorange='reversed'),
-                                  xaxis_title="Parkrun date", yaxis_title="Finishing time (mins)")
+        scatter.update_layout(
+            xaxis=dict(
+                rangeselector=dict(
+                    buttons=list([
+                        dict(count=6,
+                             label="6m",
+                             step="month",
+                             stepmode="backward"),
+                        dict(count=1,
+                             label="YTD",
+                             step="year",
+                             stepmode="todate"),
+                        dict(count=1,
+                             label="1y",
+                             step="year",
+                             stepmode="backward"),
+                        dict(step="all",
+                             label="All")
+                    ])
+                ),
+                rangeslider=dict(
+                    visible=True
+                ),
+                type="date"
+            ),
+            yaxis=dict(scaleanchor="x", scaleratio=1, autorange='reversed'),
+            xaxis_title="Parkrun date",
+            yaxis_title="Finishing time (mins)",
+            plot_bgcolor='white'
 
-        scatter.show()
+        )
+
+        # Styling
+        scatter.update_xaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='DarkSlateGrey',
+            gridcolor='lightgrey'
+        )
+
+        scatter.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='DarkSlateGrey',
+            gridcolor='lightgrey'
+        )
+
+        # scatter.show()
 
         return scatter
 

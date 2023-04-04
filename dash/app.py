@@ -11,7 +11,7 @@ import dash_bootstrap_components as dbc
 import io
 import base64
 import pickle
-import csv
+import numpy as np
 
 import os
 import sys
@@ -40,6 +40,7 @@ app.title = "Parkrun Dash"
 header_height = "4rem"
 sidebar_width = "12vw"
 parkrun_purple = "#2b233d"
+parkrun_purple_lighter = "#d1cae1" #"#afa3ca"
 
 HEADER_STYLE = {
     "position": "fixed",
@@ -107,6 +108,10 @@ summary_tab = [
                     })
 ]
 
+finishing_times_tab = [
+    dcc.Graph(id='output_finishing_times')
+]
+
 content = html.Div(
     [
         html.H4('🏃 Parkrunner profile'),
@@ -135,10 +140,13 @@ content = html.Div(
                             html.H6("📊 Results"),
                             dbc.Tabs([
                                 dbc.Tab(summary_tab,
-                                        label="Summary"),
+                                        label="Parkrunner summary"),
                                 dbc.Tab([
+                                    html.P(""),
+                                    html.H6("All parkrun results over time"),
+                                    dbc.Label("Use the buttons and filters to zoom into the interactive plot below:"),
                                     dcc.Graph(id='output_finishing_times')
-                                ], label="Finishing times"),
+                                ], label="Parkrun results over time"),
                                 dbc.Tab([
                                     html.Img(id='output_boxplot_times')
                                 ], label="Top parkrun locations"),
@@ -230,22 +238,21 @@ def update_outputs(ts, encoded_parkrunner):
                 summary_stats.set_index('Unnamed: 0').T.reset_index(drop=False, inplace=True)
                 summary_stats.rename({"Unnamed: 0": ""}, axis=1, inplace=True)
                 tbl_summary_stats = html.Div([
-                    html.H5("Summary statistics"),
+                    html.H6("Summary statistics"),
                     dash_table.DataTable(
                         # to json
                         data=summary_stats.to_dict(orient='rows'),
                         columns=[{"name": i, "id": i} for i in summary_stats.columns],
                         # formatting
-                        style_data={'color': 'black', 'backgroundColor': 'white'},
-                        style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(220, 220, 220)'}],
-                        style_header={'backgroundColor': 'rgb(210, 210, 210)', 'color': 'black', 'fontWeight': 'bold'},
+                        style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': parkrun_purple_lighter}],
+                        style_header={'backgroundColor': parkrun_purple, 'color': 'white', 'fontWeight': 'bold'},
                         style_cell={'font-family': "Segoe UI"}
                     )
                 ])
 
                 recent_parkruns = parkrunner.tables['all_results_dld']
                 tbl_recent_parkruns = html.Div([
-                    html.H5("All parkrun results"),
+                    html.H6("All parkrun results"),
                     dash_table.DataTable(
                         # to json
                         data=recent_parkruns.to_dict(orient='rows'),
@@ -260,10 +267,9 @@ def update_outputs(ts, encoded_parkrunner):
                         # export_format='csv',
 
                         # formatting
-                        style_data={'color': 'black', 'backgroundColor': 'white'},
-                        style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': 'rgb(220, 220, 220)'}],
-                        style_header={'backgroundColor': 'rgb(210, 210, 210)', 'color': 'black', 'fontWeight': 'bold'},
-                        style_cell={'font-family': "Segoe UI"},
+                        style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': parkrun_purple_lighter}],
+                        style_header={'backgroundColor': parkrun_purple, 'color': 'white', 'fontWeight': 'bold'},
+                        style_cell={'font-family': "Segoe UI"}
                     ),
 
                     html.Button("Download as CSV", id="dld_btn_parkrun_results"),
@@ -281,7 +287,7 @@ def update_outputs(ts, encoded_parkrunner):
                     buf.close()
                     return "data:image/png;base64,{}".format(data)
 
-                fig_finishing_times = parkrunner.plot_finishing_times(show_num_events=25)
+                fig_finishing_times = parkrunner.plot_finishing_times()
                 # fig_finishing_times = matplotlib_to_img(fig_finishing_times)
 
                 fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
@@ -296,7 +302,7 @@ def update_outputs(ts, encoded_parkrunner):
                        fig_finishing_times, fig_boxplot_times, fig_heatmap_attendance
 
 
-# Download parkrun results
+# SUMMARY TAB: Download parkrun results
 @app.callback(
     Output('download_parkrun_results', 'data'),
     Input('dld_btn_parkrun_results', 'n_clicks'),
@@ -310,6 +316,7 @@ def download_tbl_parkrun_results(n_clicks, encoded_parkrunner):
 
         return dcc.send_data_frame(parkrunner.tables['all_results_dld'].to_csv,
                                    filename="All Results.csv", index=False)
+
 
 # Run app ----
 if __name__ == "__main__":
