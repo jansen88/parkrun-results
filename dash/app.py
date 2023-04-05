@@ -148,7 +148,10 @@ content = html.Div(
                                     dcc.Graph(id='output_finishing_times')
                                 ], label="Parkrun results over time"),
                                 dbc.Tab([
-                                    html.Img(id='output_boxplot_times')
+                                    html.P(""),
+                                    html.H6("Parkrun location attendance and times"),
+                                    dbc.Label("Use the filters to zoom into the interactive plot below:"),
+                                    dcc.Graph(id='output_boxplot_times')
                                 ], label="Top parkrun locations"),
                                 dbc.Tab([
                                     html.Img(id='output_heatmap_attendance')
@@ -208,7 +211,7 @@ def update_parkrunner(n_clicks, athlete_id):
     Output('output_recent_parkruns', 'children'),
 
     Output('output_finishing_times', 'figure'),
-    Output('output_boxplot_times', 'src'),
+    Output('output_boxplot_times', 'figure'),
     Output('output_heatmap_attendance', 'src'),
 
     Input('store_parkrunner', 'modified_timestamp'),
@@ -291,7 +294,7 @@ def update_outputs(ts, encoded_parkrunner):
                 # fig_finishing_times = matplotlib_to_img(fig_finishing_times)
 
                 fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
-                fig_boxplot_times = matplotlib_to_img(fig_boxplot_times)
+                # fig_boxplot_times = matplotlib_to_img(fig_boxplot_times)
 
                 fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
                 fig_heatmap_attendance = matplotlib_to_img(fig_heatmap_attendance)

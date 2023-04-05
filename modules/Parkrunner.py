@@ -66,6 +66,12 @@ class Parkrunner():
         all_results = scraped_tables['all_results']
         all_results['Run Date'] = pd.to_datetime(all_results['Run Date'], format="%d/%m/%Y")
         all_results['Time_numeric'] = all_results['Time'].apply(self._convert_time)
+
+        # TODO - point everything to use this
+        # TODO - may not work if time > 60mins
+        all_results['Time_time'] = pd.to_datetime('00:' + all_results['Time']).dt.time
+        all_results['Time_datetime'] = pd.to_datetime('00:' + all_results['Time']) #.dt.time
+
         all_results = all_results.sort_values('Run Date')
         all_results['Parkrun Number'] = all_results['Run Date'].rank(ascending=True).astype('int')
         all_results.rename({"Pos": "Position"}, axis=1, inplace=True)
@@ -211,7 +217,7 @@ class Parkrunner():
 
         )
 
-        # Styling
+        # More styling
         scatter.update_xaxes(
             mirror=True,
             ticks='outside',
@@ -219,7 +225,6 @@ class Parkrunner():
             linecolor='DarkSlateGrey',
             gridcolor='lightgrey'
         )
-
         scatter.update_yaxes(
             mirror=True,
             ticks='outside',
@@ -250,10 +255,10 @@ class Parkrunner():
                                         .groupby('Event') \
                                         ['Run Date'] \
                                         .transform('nunique'),
-                    Event = lambda x: x.Event + ' (' + x.n_event.astype('str') + ')',
+                    Event_append = lambda x: x.Event + ' [' + x.n_event.astype('str') + ']',
                     min_time = lambda x: x \
                                          .groupby('Event') \
-                                         ['Time_numeric'] \
+                                         ['Time_datetime'] \
                                          .transform('min')
                     )
         if order_by == "time":
@@ -261,16 +266,57 @@ class Parkrunner():
         else:
             df = df.sort_values('n_event', ascending = False)
 
+        fig = go.Figure()
 
-        fig = plt.figure()
+        colours = px.colors.qualitative.Dark24[:df['Event'].unique().size]
+        for event, colour in zip(df['Event'].unique(), colours):
+            dff = df[df['Event'] == event]
+            fig.add_trace(
+                go.Box(y=dff["Time_datetime"],
+                       x=dff["Event_append"],
+                       name=event,
+                       marker_color=colour,
+                       boxpoints='all',
+                       customdata = np.stack(
+                           (dff["Run Date"].astype("str"),
+                            dff["n_event"],
+                            dff["Event"]),
+                           axis=-1
+                       ),
+                       hovertemplate="<br>".join([
+                                                  "Event: %{customdata[2]}",
+                                                  'Count of attendances: %{customdata[1]}',
+                                                  "Run date: %{customdata[0]}",
+                                                  "Finishing time: %{y}"
+                                                ])
+                       )
+            )
 
-        sns.boxplot(data = df,
-                    x = 'Time_numeric',
-                    y = 'Event')
-        plt.xlabel('Finish times')
-        plt.ylabel('Parkrun location (participation count)')
-        plt.title('Parkrun finish times by event location')
-        plt.tight_layout()
+        fig.update_yaxes(tickformat='%M:%S')
+        fig.update_layout(
+            height=600,
+            yaxis=dict(scaleanchor="x", scaleratio=1, autorange='reversed'),
+            xaxis=dict(rangeslider=dict(visible=True)),
+            xaxis_title="Parkrun location and attendances",
+            yaxis_title="Finishing time (mins)",
+            plot_bgcolor='white'
+        )
+
+        # More styling
+        fig.update_xaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='DarkSlateGrey',
+            gridcolor='lightgrey'
+        )
+        fig.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='DarkSlateGrey',
+            gridcolor='lightgrey'
+        )
 
         return fig
 
