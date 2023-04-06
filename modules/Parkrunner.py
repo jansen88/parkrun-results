@@ -121,7 +121,7 @@ class Parkrunner():
                              show_PB_only = False,
                              filter_start = pd.Timestamp.min,
                              filter_end = pd.Timestamp.max,
-                             show_num_events = 50):
+                             show_num_events = None):
 
         """
         Note - Expects Run Date to be datetime and Time_numeric column to be created
@@ -152,7 +152,9 @@ class Parkrunner():
             df = df[df.Time == df.PB_times]
 
         # subset after PB calcs
-        df = df.tail(show_num_events)
+        if show_num_events:
+            df = df.tail(show_num_events)
+
         df_pb = df[~pd.isnull(df.PB_times_numeric)]
 
         ### build plot - ty chatgpt for converting from matplotlib
@@ -186,6 +188,7 @@ class Parkrunner():
                                      name='Personal best'))
 
         scatter.update_layout(
+            height=600,
             xaxis=dict(
                 rangeselector=dict(
                     buttons=list([
@@ -299,7 +302,8 @@ class Parkrunner():
             xaxis=dict(rangeslider=dict(visible=True)),
             xaxis_title="Parkrun location and attendances",
             yaxis_title="Finishing time (mins)",
-            plot_bgcolor='white'
+            plot_bgcolor='white',
+            margin=dict(t=20)
         )
 
         # More styling
@@ -352,21 +356,23 @@ class Parkrunner():
             .sort_values(['year', 'month_int']) \
             .reset_index()
 
+        months = participation.loc[:, ["month", "month_int"]].drop_duplicates().sort_values("month_int")["month"].to_list()
+
         # pivot for heatmap
         participation = participation \
-            .pivot(index=["month_int", "month"], columns="year", values="count") \
-            .reset_index("month_int") \
-            .drop("month_int", axis=1)
+            .drop("month_int", axis=1) \
+            .pivot(index=["year"], columns="month", values="count") \
+            .loc[:, months]
 
-        # plot heatmap
-        fig = plt.figure()
-
-        sns.heatmap(participation, vmin=0, vmax=6, cmap='rocket_r', annot=True,
-                    cbar_kws={'label': 'Number of parkruns'})
-        plt.xlabel('Month')
-        plt.ylabel('Year')
-        plt.title('Parkrun attendance by year/month')
-        plt.tight_layout()
+        fig = px.imshow(participation,
+                        labels=dict(x="Month", y="Year", color="Number of parkruns"),
+                        x=[str(i) for i in participation.columns.to_list()],
+                        y=[str(i) for i in participation.index.to_list()],
+                        color_continuous_scale="oranges",
+                        text_auto=True
+                        )
+        fig.update_layout(plot_bgcolor='white',
+                          margin=dict(t=20))
 
         return fig
 

@@ -6,6 +6,8 @@ import pandas as pd
 import dash
 from dash import Dash, dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
+import dash_daq as daq
+
 # import plotly
 # import mpld3
 import io
@@ -108,10 +110,6 @@ summary_tab = [
                     })
 ]
 
-finishing_times_tab = [
-    dcc.Graph(id='output_finishing_times')
-]
-
 content = html.Div(
     [
         html.H4('🏃 Parkrunner profile'),
@@ -141,20 +139,42 @@ content = html.Div(
                             dbc.Tabs([
                                 dbc.Tab(summary_tab,
                                         label="Parkrunner summary"),
+
                                 dbc.Tab([
                                     html.P(""),
                                     html.H6("All parkrun results over time"),
+                                    dbc.Label("This plot shows how this parkrunner's finishing times have improved over time."),
+                                    html.Br(),
                                     dbc.Label("Use the buttons and filters to zoom into the interactive plot below:"),
                                     dcc.Graph(id='output_finishing_times')
                                 ], label="Parkrun results over time"),
+
                                 dbc.Tab([
                                     html.P(""),
                                     html.H6("Parkrun location attendance and times"),
+                                    html.Div([
+                                        html.Div(dbc.Label("Order plot by:"), style={"display": "inline-block"}),
+                                        html.Div(dcc.Dropdown(["Best times", "Most attendances"],
+                                                     value="Best times",
+                                                     id="input_boxplot_order_by",
+                                                     clearable=False,
+                                                     style={"width": "300px"}),
+                                                 style={"margin-left": "10px",
+                                                        "display": "inline-block",
+                                                        "vertical-align": "middle"})
+                                    ]),
+                                    html.P(""),
+                                    dbc.Label("This plot provides insights into this parkrunner's favourite and fastest parkruns."),
+                                    html.Br(),
                                     dbc.Label("Use the filters to zoom into the interactive plot below:"),
                                     dcc.Graph(id='output_boxplot_times')
                                 ], label="Top parkrun locations"),
+
                                 dbc.Tab([
-                                    html.Img(id='output_heatmap_attendance')
+                                    html.P(""),
+                                    html.H6("Parkrun location attendance"),
+                                    dbc.Label("This plot illustrates how consistently this parkrunner attends parkruns:"),
+                                    dcc.Graph(id='output_heatmap_attendance')
                                 ], label="Parkrun attendance")
                             ]),
                             html.Div(id="output_loading"),
@@ -211,8 +231,8 @@ def update_parkrunner(n_clicks, athlete_id):
     Output('output_recent_parkruns', 'children'),
 
     Output('output_finishing_times', 'figure'),
-    Output('output_boxplot_times', 'figure'),
-    Output('output_heatmap_attendance', 'src'),
+    # Output('output_boxplot_times', 'figure'),
+    Output('output_heatmap_attendance', 'figure'),
 
     Input('store_parkrunner', 'modified_timestamp'),
     State('store_parkrunner', 'data'),
@@ -297,12 +317,13 @@ def update_outputs(ts, encoded_parkrunner):
                 # fig_boxplot_times = matplotlib_to_img(fig_boxplot_times)
 
                 fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
-                fig_heatmap_attendance = matplotlib_to_img(fig_heatmap_attendance)
+                # fig_heatmap_attendance = matplotlib_to_img(fig_heatmap_attendance)
 
                 return "", \
                        name, age_category, nbr_parkruns, \
                        tbl_summary_stats, tbl_recent_parkruns, \
-                       fig_finishing_times, fig_boxplot_times, fig_heatmap_attendance
+                       fig_finishing_times, \
+                       fig_heatmap_attendance
 
 
 # SUMMARY TAB: Download parkrun results
@@ -320,6 +341,30 @@ def download_tbl_parkrun_results(n_clicks, encoded_parkrunner):
         return dcc.send_data_frame(parkrunner.tables['all_results_dld'].to_csv,
                                    filename="All Results.csv", index=False)
 
+
+# LOCATIONS BOXPLOT TAB: Order axis by
+@app.callback(
+    Output('output_boxplot_times', 'figure'),
+    Input('input_boxplot_order_by', 'value'),
+    Input('store_parkrunner', 'modified_timestamp'),
+    State('store_parkrunner', 'data'),
+)
+def refresh_plot(order_by, ts, encoded_parkrunner):
+
+    if ts is None:
+        raise dash.exceptions.PreventUpdate
+    else:
+        ctx = dash.callback_context
+        if ctx.triggered:
+            prop_id = ctx.triggered[0]['prop_id']
+            if prop_id in ['store_parkrunner.modified_timestamp', 'input_boxplot_order_by.value']:
+                decoded_parkrunner = base64.b64decode(encoded_parkrunner)
+                parkrunner = pickle.loads(decoded_parkrunner)
+                if order_by == "Most attendances":
+                    BY = "events"
+                else:
+                    BY = "time"
+                return parkrunner.plot_boxplot_times_by_event(order_by=BY)
 
 # Run app ----
 if __name__ == "__main__":
