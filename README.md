@@ -3,5 +3,8 @@
 
 Small working repository for scraping, exploring visualising parkrun results
 
+## Dashboard
+Now includes fully sick dashboard - see dash/app.py to run locally
+
 ## Examples
 See demo/demo.ipynb for example output
