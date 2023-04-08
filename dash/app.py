@@ -122,7 +122,7 @@ content = html.Div(
                     html.H6("🔎 Parkrunner"),
                     dbc.Label("Search for parkrunner:"),
                     dbc.Input(id="input_athlete_id",
-                            placeholder="Athlete ID e.g. 7417035",
+                            placeholder="Athlete ID e.g. 4360023",
                             style={"width": "400px"}),
                     html.P(""),
                     html.Button('Submit', id='input_ok_athlete_id', n_clicks=0,

@@ -349,28 +349,41 @@ class Parkrunner():
                                    date_col = "dates")
 
         # count attendance
-        participation = all_dates \
-            .merge(participation, how = "left") \
-            .groupby(['year', 'month', 'month_int']) \
-            .agg(count=('Run Date', 'nunique')) \
-            .sort_values(['year', 'month_int']) \
+        participation = (
+            all_dates
+            .merge(participation, how="left")
+            .groupby(['year', 'month', 'month_int'])
+            .agg(
+                count=('Run Date', 'nunique'),
+                parkruns=('Event', lambda x: x.str.cat(sep=', ')),
+                times=('Time_time', lambda x: x.astype('str').str.cat(sep=', '))
+            )
+            .sort_values(['year', 'month_int'])
             .reset_index()
+        )
+        participation["combined"] = [([x], [y]) for x,y in zip(participation.parkruns, participation.times)]
 
         months = participation.loc[:, ["month", "month_int"]].drop_duplicates().sort_values("month_int")["month"].to_list()
 
-        # pivot for heatmap
-        participation = participation \
-            .drop("month_int", axis=1) \
+        # pivot data for heatmap
+        z1 = participation \
             .pivot(index=["year"], columns="month", values="count") \
             .loc[:, months]
 
-        fig = px.imshow(participation,
+        # pivot customdata for z2
+        z2 = participation \
+            .pivot(index=["year"], columns="month", values="combined") \
+            .loc[:, months]
+
+        fig = px.imshow(z1,
                         labels=dict(x="Month", y="Year", color="Number of parkruns"),
-                        x=[str(i) for i in participation.columns.to_list()],
-                        y=[str(i) for i in participation.index.to_list()],
+                        x=[str(i) for i in z1.columns.to_list()],
+                        y=[str(i) for i in z1.index.to_list()],
                         color_continuous_scale="oranges",
                         text_auto=True
                         )
+        fig.update(data=[{'customdata': z2,
+                          'hovertemplate': 'Year: %{y}<br>Month: %{x}<br>Number of parkruns: %{z}<br>Parkrun locations: %{customdata[0]}<br>Times: %{customdata[1]}<extra></extra>'}])
         fig.update_layout(plot_bgcolor='white',
                           margin=dict(t=20))
 
