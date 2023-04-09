@@ -254,7 +254,7 @@ def update_outputs(ts, encoded_parkrunner):
 
                 name = f'Parkrunner: {info["athlete_name"]}'
                 age_category = f'Last updated age category: {info["last_age_category"]}'
-                nbr_parkruns = f'Total parkrun attendances: {info["nbr_parkruns"]}'
+                nbr_parkruns = f'Parkrun attendances: {info["nbr_parkruns"]} parkruns @ {parkrunner.tables["all_results"].Event.nunique()} locations'
 
                 # Tables
                 summary_stats = parkrunner.tables['summary_stats']

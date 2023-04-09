@@ -77,8 +77,12 @@ class Parkrunner():
         all_results.rename({"Pos": "Position"}, axis=1, inplace=True)
 
         # extra cleaning for download
-        all_results_dld = all_results[["Parkrun Number", "Event", "Run Date", "Position", "Time", "Age Grade"]] \
+        all_results_dld = all_results[["Parkrun Number", "Event", "Run Date", "Position", "Time", "PB?","Age Grade"]] \
             .sort_values("Run Date", ascending=False)
+        all_results_dld["PB?"] = np.where(all_results_dld["PB?"] == "PB",
+                                          "🔥",
+                                          None)
+        all_results_dld.rename({"PB?": "PB"}, axis=1, inplace=True)
         all_results_dld["Run Date"] = all_results_dld["Run Date"].apply(lambda x: x.date())
 
         # update with cleaned table
