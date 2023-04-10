@@ -120,7 +120,17 @@ content = html.Div(
             dbc.Col([
                 dbc.Card([
                     html.H6("🔎 Parkrunner"),
-                    dbc.Label("Search for parkrunner:"),
+                    html.Div([
+                        html.Div(dbc.Label("Search for parkrunner"), style={'display': 'inline-block'}),
+                        html.Div(html.I(className="fa-solid fa-info-circle", style={"padding-left": "5px"}),
+                                 id="tooltip_parkrunner_search",
+                                 style={'display': 'inline-block'}),
+                        dbc.Tooltip(
+                            "Search using parkrun ID - e.g. 4360023 - as parkrunners are not currently searchable by name.",
+                            target="tooltip_parkrunner_search",
+                        ),
+                        html.Div(dbc.Label(":"), style={'display': 'inline-block'})
+                    ]),
                     dbc.Input(id="input_athlete_id",
                             placeholder="Athlete ID e.g. 4360023",
                             style={"width": "400px"}),
@@ -264,7 +274,7 @@ def update_outputs(ts, encoded_parkrunner):
                     html.H6("Summary statistics"),
                     dash_table.DataTable(
                         # to json
-                        data=summary_stats.to_dict(orient='rows'),
+                        data=summary_stats.to_dict('records'),
                         columns=[{"name": i, "id": i} for i in summary_stats.columns],
                         # formatting
                         style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': parkrun_purple_lighter}],
@@ -278,8 +288,15 @@ def update_outputs(ts, encoded_parkrunner):
                     html.H6("All parkrun results"),
                     dash_table.DataTable(
                         # to json
-                        data=recent_parkruns.to_dict(orient='rows'),
+                        data=recent_parkruns.to_dict('records'),
                         columns=[{"name": i, "id": i} for i in recent_parkruns.columns],
+                        tooltip_header={
+                            "Parkrun Number": ["Index number for count of parkruns completed, for this parkrunner"],
+                            "Event": ["Parkrun event location name"],
+                            "Run Date": ["Parkrun event date - this will typically be a Saturday, but could be other days for national special events!"],
+                            "PB": ["Identifies if this finishing time was an all time personal best, at the time of the parkrun"],
+                            "Age Grade": ["Age grade compares your time to other times of parkrunner's of your gender and age. The higher the age grade, the better the performance."]
+                        },
 
                         # user interactivity
                         filter_action="native",
@@ -291,7 +308,18 @@ def update_outputs(ts, encoded_parkrunner):
 
                         # formatting
                         style_data_conditional=[{'if': {'row_index': 'odd'}, 'backgroundColor': parkrun_purple_lighter}],
-                        style_header={'backgroundColor': parkrun_purple, 'color': 'white', 'fontWeight': 'bold'},
+                        style_header={'backgroundColor': parkrun_purple,
+                                      'color': 'white',
+                                      'fontWeight': 'bold'},
+                        style_header_conditional=[{
+                                'if': {'column_id': ["Parkrun Number", "Event", "Run Date", "PB", "Age Grade"]},
+                                'textDecoration': 'underline',
+                                'textDecorationStyle': 'dotted',
+                        }],
+                        css=[{
+                            'selector': '.dash-table-tooltip',
+                            'rule': 'background-color: black; color: white; border-radius: 6px'
+                        }],
                         style_cell={'font-family': "Segoe UI"}
                     ),
 
