@@ -5,6 +5,8 @@ Small working repository for scraping, exploring visualising parkrun results
 
 ## Dashboard
 Now includes fully sick dashboard - see dash/app.py to run locally
+![image](https://user-images.githubusercontent.com/94953297/230846656-0b009b82-f794-4007-bb3e-e33671c4cd8f.png)
+
 
 ## Examples
 See demo/demo.ipynb for example output
