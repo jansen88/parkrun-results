@@ -5,4 +5,5 @@ Repository for scraping, exploring visualising parkrun results
 
 ## Dashboard
 Now includes cool dashboard built in Dash - see dash/app.py to run locally
-![image](https://user-images.githubusercontent.com/94953297/230846656-0b009b82-f794-4007-bb3e-e33671c4cd8f.png)
+![image](https://user-images.githubusercontent.com/94953297/230847315-cf15bce9-7a46-4038-b7ba-aed8f8083052.png)
+
