@@ -1,0 +1,19 @@
+header {
+  height: 64px;
+  line-height: 64px;
+  background-color: rgb(0, 146, 159);
+  width: 100%;
+}
+
+.nav-bar-text-link, .nav-bar-text-link:hover {
+  color: white;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  text-decoration-color: white;
+  font-weight: bold;
+  margin-left: 15px;
+}
+
+body {
+    background: #f5f6fa;
+    margin: 0px;
+}
