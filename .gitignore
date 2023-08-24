@@ -1,5 +1,6 @@
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# .pyc files
+# .pyc files in pycache
+ __pycache__/
 *.pyc 
