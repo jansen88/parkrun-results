@@ -1,0 +1,13 @@
+dash==2.8.1
+dash_bootstrap_components==1.4.0
+dash_core_components==2.0.0
+dash_daq==0.5.0
+dash_html_components==2.0.0
+Flask==2.2.3
+matplotlib==3.6.3
+numpy==1.24.2
+pandas==1.5.3
+plotly==5.13.1
+Requests==2.31.0
+scipy==1.11.2
+seaborn==0.12.2
