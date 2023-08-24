@@ -16,7 +16,7 @@ from dash_app.parkrunner_app.global_scheme import parkrun_purple, parkrun_purple
 
 def register_callbacks(app):
 
-    # Fetch parkrunner class and store intermediate value for other callbacks
+    #################################   Load data   #################################
     @app.callback(
         Output("store_parkrunner", "data"),
         Input('input_ok_athlete_id', 'n_clicks'),
@@ -24,6 +24,7 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def update_parkrunner(n_clicks, athlete_id):
+        """Load parkrunner data"""
         if n_clicks:
             parkrunner = Parkrunner(athlete_id)
 
@@ -36,10 +37,9 @@ def register_callbacks(app):
         return encoded_parkrunner
 
 
-    # Update outputs when parkrunner store is updated
+    #################################   Update outputs   #################################
     @app.callback(
         [
-            # TODO - better to split into different callbacks
             Output("output_loading", "children"),
 
             Output('output_name', 'children'),
@@ -50,7 +50,6 @@ def register_callbacks(app):
             Output('output_recent_parkruns', 'children'),
 
             Output('output_finishing_times', 'figure'),
-            # Output('output_boxplot_times', 'figure'),
             Output('output_heatmap_attendance', 'figure'),
         ],
         Input('store_parkrunner', 'modified_timestamp'),
@@ -58,6 +57,7 @@ def register_callbacks(app):
         prevent_initial_call=True
     )
     def update_outputs(ts, encoded_parkrunner):
+        """Update everything"""
         if ts is None:
             raise dash.exceptions.PreventUpdate
         else:
@@ -68,17 +68,21 @@ def register_callbacks(app):
                     decoded_parkrunner = base64.b64decode(encoded_parkrunner)
                     parkrunner = pickle.loads(decoded_parkrunner)
 
-                    # Parkrunner info
+                    ###### Parkrunner info ######
                     info = parkrunner.other_info
 
                     name = f'Parkrunner: {info["athlete_name"]}'
                     age_category = f'Last updated age category: {info["last_age_category"]}'
                     nbr_parkruns = f'Parkrun attendances: {info["nbr_parkruns"]} parkruns @ {parkrunner.tables["all_results"].Event.nunique()} locations'
 
-                    # Tables
-                    summary_stats = parkrunner.tables['summary_stats']
-                    summary_stats.set_index('Unnamed: 0').T.reset_index(drop=False, inplace=True)
-                    summary_stats.rename({"Unnamed: 0": ""}, axis=1, inplace=True)
+                    ###### Tables ######
+                    summary_stats = (
+                        parkrunner.tables['summary_stats']
+                            .set_index('Unnamed: 0')
+                            .T
+                            .reset_index(drop=False)
+                            .rename({"Unnamed: 0": ""}, axis=1)
+                    )
                     tbl_summary_stats = html.Div([
                         html.H6("Summary statistics"),
                         dash_table.DataTable(
@@ -136,25 +140,10 @@ def register_callbacks(app):
                         dcc.Download(id="download_parkrun_results")
                     ])
 
-                    # Charts
-
-                    def matplotlib_to_img(fig):
-                        """Helper function - convert matplotlib charts to img to show in Dash"""
-
-                        buf = io.BytesIO()
-                        fig.savefig(buf, format="png")
-                        data = base64.b64encode(buf.getbuffer()).decode("utf8")  # encode to html elements
-                        buf.close()
-                        return "data:image/png;base64,{}".format(data)
-
+                    ###### Charts ######
                     fig_finishing_times = parkrunner.plot_finishing_times()
-                    # fig_finishing_times = matplotlib_to_img(fig_finishing_times)
-
                     fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
-                    # fig_boxplot_times = matplotlib_to_img(fig_boxplot_times)
-
                     fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
-                    # fig_heatmap_attendance = matplotlib_to_img(fig_heatmap_attendance)
 
                     return "", \
                            name, age_category, nbr_parkruns, \
