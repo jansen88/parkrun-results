@@ -11,6 +11,8 @@ import seaborn as sns
 from scipy import stats
 from datetime import timedelta
 
+from parkrun.constants import parkrun_url
+import parkrun.load_data as load_data
 
 # class for parkrun event ----------------------------
 class Parkrun():
@@ -34,14 +36,9 @@ class Parkrun():
 
     # Data scraping / collecting ----
     def scrape_latest_results(self):
-        parkrun_url = 'https://www.parkrun.com.au/'
-
         latest_results_url = parkrun_url + self.event_url_name + '/results/latestresults/'
 
-        page_all_results = requests.get(latest_results_url, headers={
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
-
-        return page_all_results
+        return  load_data.scrape_url(latest_results_url)
 
     def collect_latest_results(self, raw_results):
 

@@ -1,4 +1,4 @@
-# Last updated: 2023-03-10
+# Last updated: 2023-08-26
 # Dev notes -
 # 1. returns a lot of warnings right now
 # e.g. A value is trying to be set on a copy of a slice from a DataFrame.
@@ -20,6 +20,9 @@ from itertools import product
 import plotly.express as px
 import plotly.graph_objs as go
 
+from parkrun.constants import parkrun_url
+import parkrun.load_data as load_data
+
 # class for athlete data -----------------------------
 class Parkrunner():
     """ Scrapes athlete data from athlete_id and returns data and charts """
@@ -38,13 +41,9 @@ class Parkrunner():
     # Data scraping / collecting ----
     def scrape_data(self):
         """ Scrape athlete data """
-        parkrun_url = 'https://www.parkrun.com.au/parkrunner/'
-        athlete_url = parkrun_url + self.athlete_id + '/all'
+        athlete_url = f"{parkrun_url}/parkrunner/{self.athlete_id}/all"
 
-        page_all_results = requests.get(athlete_url, headers={
-            'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0'})
-
-        return page_all_results
+        return load_data.scrape_url(athlete_url)
 
     def collect_tables(self, raw_results):
         """

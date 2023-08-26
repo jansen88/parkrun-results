@@ -10,7 +10,6 @@ import dash_bootstrap_components as dbc
 import dash_daq as daq
 
 from parkrun.Parkrunner import Parkrunner
-from parkrun.Parkrun import Parkrun
 
 from dash_app.parkrunner_app.global_scheme import parkrun_purple, parkrun_purple_lighter
 
