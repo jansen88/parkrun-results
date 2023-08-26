@@ -3,13 +3,18 @@ import base64
 import pickle
 import pandas as pd
 import numpy as np
+import json
 
 import dash
 from dash import  dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
-import dash_daq as daq
+import dash_leaflet as dl
+import dash_leaflet.express as dlx
+from dash_extensions.javascript import assign
+import geopandas as gpd
 
 from parkrun.Parkrunner import Parkrunner
+from parkrun.load_data import get_parkrun_locations
 
 from dash_app.parkrunner_app.global_scheme import parkrun_purple, parkrun_purple_lighter
 
@@ -50,6 +55,8 @@ def register_callbacks(app):
 
             Output('output_finishing_times', 'figure'),
             Output('output_heatmap_attendance', 'figure'),
+
+            Output('output_locations_map', 'children')
         ],
         Input('store_parkrunner', 'modified_timestamp'),
         State('store_parkrunner', 'data'),
@@ -144,11 +151,50 @@ def register_callbacks(app):
                     fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
                     fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
 
+
+                    ###### Map ######
+                    # Get parkrun locations json and convert to geojson
+                    features = get_parkrun_locations()
+
+                    search_for = parkrunner.tables["all_results"].Event.unique()
+                    #["Rhodes", "Parramatta", "Wentworth Common"]
+                    keep_locations = []
+                    for dict in features:
+                        if dict["properties"]["EventShortName"] in search_for:
+                            keep_locations.append(dict)
+
+                    locations = gpd.GeoDataFrame.from_features(keep_locations)
+                    geojson = json.loads(locations.to_json())
+                    
+                    # Centre coordinates
+                    centre_coords = keep_locations[0]['geometry']['coordinates']
+                    centre_coords.reverse() 
+
+                    # Javascript function to draw marker
+                    draw_icon = assign("""function(feature, latlng){
+                    const icon = L.icon({iconUrl: `https://png2.cleanpng.com/sh/9b546064281f59a87568ea77eb528d3a/L0KzQYm3V8AyN6Vqi5H0aYP2gLBuTfNwdaF6jNd7LXnmf7B6TfRwf59xh9NtLUXlQ4q6hsE0QGE5ftM8LkC4RoKAWcc4OWY4SKYCOEO4RYa5VcYveJ9s/kisspng-computer-icons-download-5b393f13804fa3.0561797715304783555256.png`, iconSize: [48, 48]});
+                    return L.marker(latlng, {icon: icon});
+                    }""")
+
+                    map_locations = dl.Map(center=centre_coords,
+                                            zoom=4,
+                                            children=[
+                                                 dl.TileLayer(),
+                                                 dl.GeoJSON(
+                                                     data=dlx.geojson_to_geobuf(geojson), 
+                                                     format='geobuf',
+                                                     cluster=True,
+                                                     # options=dict(pointToLayer=draw_icon)
+                                                 ),
+                                            ]
+                                        , style={'width': '100%', 'height': '60vh'})
+
                     return "", \
                            name, age_category, nbr_parkruns, \
                            tbl_summary_stats, tbl_recent_parkruns, \
                            fig_finishing_times, \
-                           fig_heatmap_attendance
+                           fig_heatmap_attendance, \
+                           map_locations
 
 
     # SUMMARY TAB: Download parkrun results
