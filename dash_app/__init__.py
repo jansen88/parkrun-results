@@ -1,6 +1,7 @@
 from flask import Flask
 from flask.helpers import get_root_path
 from dash import Dash
+import os
 from os import getpid
 import dash_bootstrap_components as dbc
 
@@ -36,11 +37,28 @@ def register_dash_app(flask_server, title, base_pathname, layout, register_callb
     # Meta tags for viewport responsiveness
     meta_viewport = {"name": "viewport", "content": "width=device-width, initial-scale=1, shrink-to-fit=no"}
 
+    print("HELLO LOOK ME", get_root_path(__name__))
+    print("c:\\Users\\janse\\Documents\\GitHub\\parkrunFun\\assets")
+
+    root_path = get_root_path(__name__)
+
+    # if in /parkrunFun
+    if os.path.isdir(os.path.join(root_path, 'dash_app')) & \
+        os.path.isdir(os.path.join(root_path, 'assets')):
+        assets_folder = os.path.join(root_path, 'assets')
+    else:
+    # otherwise - if in /parkrunFun/dash_app
+        assets_folder = os.path.abspath(os.path.join(root_path, '..', 'assets'))
+
     parkrunner_app = Dash(
         __name__,
         server=flask_server,
         # url_base_pathname=f'/{base_pathname}/',
-        # assets_folder=get_root_path(__name__) + '/static/',
+        # FIXME - Dash wants to use this folder - not sure if this is right
+        # assets_folder=get_root_path(__name__) + '\\assets',
+        assets_folder=assets_folder,
+        # assets_folder="c:\\Users\\janse\\Documents\\GitHub\\parkrunFun\\assets",
+        
         # meta_tags=[meta_viewport],
         external_stylesheets=[
             dbc.themes.BOOTSTRAP,
@@ -50,7 +68,8 @@ def register_dash_app(flask_server, title, base_pathname, layout, register_callb
                 # "integrity": "sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==",
                 "crossorigin": "anonymous",
                 "referrerpolicy": "no-referrer"
-            }]        # external_scripts=[]
+            }],
+        # external_scripts=['https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js']
     )
 
     with flask_server.app_context():

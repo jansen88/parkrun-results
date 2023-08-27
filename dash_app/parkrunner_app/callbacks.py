@@ -10,7 +10,8 @@ from dash import  dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
-from dash_extensions.javascript import assign
+from dash_extensions.javascript import assign, Namespace
+
 import geopandas as gpd
 
 from parkrun.Parkrunner import Parkrunner
@@ -157,37 +158,42 @@ def register_callbacks(app):
                     features = get_parkrun_locations()
 
                     search_for = parkrunner.tables["all_results"].Event.unique()
-                    #["Rhodes", "Parramatta", "Wentworth Common"]
                     keep_locations = []
-                    for dict in features:
-                        if dict["properties"]["EventShortName"] in search_for:
-                            keep_locations.append(dict)
+                    for x in features:
+                        if x["properties"]["EventShortName"] in search_for:
+                            keep_locations.append(x)
 
-                    locations = gpd.GeoDataFrame.from_features(keep_locations)
-                    geojson = json.loads(locations.to_json())
-                    
+                    dicts = [
+                        {
+                            "tooltip": m['properties']["EventLongName"],
+                            "popup": m['properties']["EventLongName"],
+                            "lat": m['geometry']['coordinates'][1],
+                            "lon": m['geometry']['coordinates'][0]
+                        } for m in keep_locations
+                    ]
+
+                    ns = Namespace('dashExtensions','dashExtensionssub')
+                    dl_cluster = dl.GeoJSON(
+                        id="markers",
+                        data=dlx.dicts_to_geojson(dicts),
+                        cluster=True,
+                        zoomToBoundsOnClick=True,
+                        options=dict(pointToLayer=ns('customMarker'))
+                    )
+
                     # Centre coordinates
                     centre_coords = keep_locations[0]['geometry']['coordinates']
-                    centre_coords.reverse() 
+                    centre_coords.reverse()
 
-                    # Javascript function to draw marker
-                    draw_icon = assign("""function(feature, latlng){
-                    const icon = L.icon({iconUrl: `https://png2.cleanpng.com/sh/9b546064281f59a87568ea77eb528d3a/L0KzQYm3V8AyN6Vqi5H0aYP2gLBuTfNwdaF6jNd7LXnmf7B6TfRwf59xh9NtLUXlQ4q6hsE0QGE5ftM8LkC4RoKAWcc4OWY4SKYCOEO4RYa5VcYveJ9s/kisspng-computer-icons-download-5b393f13804fa3.0561797715304783555256.png`, iconSize: [48, 48]});
-                    return L.marker(latlng, {icon: icon});
-                    }""")
-
-                    map_locations = dl.Map(center=centre_coords,
-                                            zoom=4,
-                                            children=[
-                                                 dl.TileLayer(),
-                                                 dl.GeoJSON(
-                                                     data=dlx.geojson_to_geobuf(geojson), 
-                                                     format='geobuf',
-                                                     cluster=True,
-                                                     # options=dict(pointToLayer=draw_icon)
-                                                 ),
-                                            ]
-                                        , style={'width': '100%', 'height': '60vh'})
+                    map_locations = dl.Map(
+                                        center=centre_coords, 
+                                        zoom=4,
+                                        children=[
+                                            dl.TileLayer(),
+                                            dl_cluster
+                                        ],
+                                        style={'width': '100%', 'height': '60vh'}
+                                    )
 
                     return "", \
                            name, age_category, nbr_parkruns, \
@@ -236,4 +242,3 @@ def register_callbacks(app):
                     else:
                         BY = "time"
                     return parkrunner.plot_boxplot_times_by_event(order_by=BY)
-
