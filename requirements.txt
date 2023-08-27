@@ -1,9 +1,12 @@
-dash==2.8.1
+dash==2.12.1
 dash_bootstrap_components==1.4.0
 dash_core_components==2.0.0
 dash_daq==0.5.0
+dash_extensions==0.0.65
 dash_html_components==2.0.0
+dash_leaflet==1.0.0
 Flask==2.2.3
+geopandas==0.13.2
 matplotlib==3.6.3
 numpy==1.24.2
 pandas==1.5.3
