@@ -3,14 +3,19 @@ import base64
 import pickle
 import pandas as pd
 import numpy as np
+import json
 
 import dash
 from dash import  dcc, html, Input, Output, State, dash_table
 import dash_bootstrap_components as dbc
-import dash_daq as daq
+import dash_leaflet as dl
+import dash_leaflet.express as dlx
+from dash_extensions.javascript import assign, Namespace
+
+import geopandas as gpd
 
 from parkrun.Parkrunner import Parkrunner
-from parkrun.Parkrun import Parkrun
+from parkrun.load_data import get_parkrun_locations
 
 from dash_app.parkrunner_app.global_scheme import parkrun_purple, parkrun_purple_lighter
 
@@ -51,6 +56,8 @@ def register_callbacks(app):
 
             Output('output_finishing_times', 'figure'),
             Output('output_heatmap_attendance', 'figure'),
+
+            Output('output_locations_map', 'children')
         ],
         Input('store_parkrunner', 'modified_timestamp'),
         State('store_parkrunner', 'data'),
@@ -145,11 +152,69 @@ def register_callbacks(app):
                     fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
                     fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
 
+
+                    ###### Map ######
+                    # Get parkrun locations json and convert to geojson
+                    features = get_parkrun_locations()
+
+                    search_for = parkrunner.tables["all_results"].Event.unique()
+                    keep_locations = []
+                    for x in features:
+                        if x["properties"]["EventShortName"] in search_for:
+
+                            event = x["properties"]["EventShortName"]
+                            df = parkrunner.tables["all_results"]
+                            df = df[df.Event == event]
+
+                            last_attendance = str(df['Run Date'].max().date())
+                            attendances = len(df)
+                            fastest_time = str(df.Time_time.min())
+
+                            add_text = f"Most recent attendance: {last_attendance}<br>Total attendances: {attendances}<br>Fastest time: {fastest_time} "
+                            x['add_text'] = add_text
+
+                            keep_locations.append(x)
+
+                    
+
+                    dicts = [
+                        {
+                            "tooltip": f"{m['properties']['EventLongName']}<br> {m['add_text']}",
+                            "popup": f"{m['properties']['EventLongName']}<br> {m['add_text']}",
+                            "lat": m['geometry']['coordinates'][1],
+                            "lon": m['geometry']['coordinates'][0]
+                        } for m in keep_locations
+                    ]
+
+                    ns = Namespace('dashExtensions','dashExtensionssub')
+                    dl_cluster = dl.GeoJSON(
+                        id="markers",
+                        data=dlx.dicts_to_geojson(dicts),
+                        cluster=True,
+                        zoomToBoundsOnClick=True,
+                        options=dict(pointToLayer=ns('customMarker'))
+                    )
+
+                    # Centre coordinates
+                    centre_coords = keep_locations[0]['geometry']['coordinates']
+                    centre_coords.reverse()
+
+                    map_locations = dl.Map(
+                                        center=centre_coords, 
+                                        zoom=4,
+                                        children=[
+                                            dl.TileLayer(),
+                                            dl_cluster
+                                        ],
+                                        style={'width': '100%', 'height': '60vh'}
+                                    )
+
                     return "", \
                            name, age_category, nbr_parkruns, \
                            tbl_summary_stats, tbl_recent_parkruns, \
                            fig_finishing_times, \
-                           fig_heatmap_attendance
+                           fig_heatmap_attendance, \
+                           map_locations
 
 
     # SUMMARY TAB: Download parkrun results
@@ -191,4 +256,3 @@ def register_callbacks(app):
                     else:
                         BY = "time"
                     return parkrunner.plot_boxplot_times_by_event(order_by=BY)
-
