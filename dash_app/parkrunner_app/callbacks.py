@@ -161,12 +161,26 @@ def register_callbacks(app):
                     keep_locations = []
                     for x in features:
                         if x["properties"]["EventShortName"] in search_for:
+
+                            event = x["properties"]["EventShortName"]
+                            df = parkrunner.tables["all_results"]
+                            df = df[df.Event == event]
+
+                            last_attendance = str(df['Run Date'].max().date())
+                            attendances = len(df)
+                            fastest_time = str(df.Time_time.min())
+
+                            add_text = f"Most recent attendance: {last_attendance}<br>Total attendances: {attendances}<br>Fastest time: {fastest_time} "
+                            x['add_text'] = add_text
+
                             keep_locations.append(x)
+
+                    
 
                     dicts = [
                         {
-                            "tooltip": m['properties']["EventLongName"],
-                            "popup": m['properties']["EventLongName"],
+                            "tooltip": f"{m['properties']['EventLongName']}<br> {m['add_text']}",
+                            "popup": f"{m['properties']['EventLongName']}<br> {m['add_text']}",
                             "lat": m['geometry']['coordinates'][1],
                             "lon": m['geometry']['coordinates'][0]
                         } for m in keep_locations
