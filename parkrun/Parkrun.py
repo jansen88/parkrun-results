@@ -1,6 +1,3 @@
-# Last updated: 2023-03-10
-
-
 # libs -----------------------------------------------
 import requests
 import numpy as np

@@ -1,14 +1,13 @@
-import dash_core_components as dcc
-import dash_html_components as html
-# from dash_app.dash_shared import shared_dash_nav_links
-from dash import Dash, dcc, html, Input, Output, State, dash_table
+from dash_extensions.enrich import dcc, html
+
 import dash_bootstrap_components as dbc
+
 import dash_daq as daq
 
 from dash_app.parkrunner_app.global_scheme import HEADER_STYLE, SIDEBAR_STYLE, CONTENT_STYLE,\
-      parkrun_purple, parkrun_purple_lighter
+      parkrun_purple, parkrun_purple_lighter, tab_height
 
-tab_height = '5vh'
+
 
 layout = html.Div([
     ################ Header ################
@@ -50,6 +49,8 @@ layout = html.Div([
                                 placeholder="Athlete ID e.g. 4360023",
                                 style={"width": "400px"}),
                         html.P(""),
+                        # dbc.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
+                        #             style={"width": "100px"})
                         html.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
                                     style={"width": "100px"})
                     ], style={"width": "90%", "padding": "20px", 'min-height':'35vh'}
@@ -153,7 +154,9 @@ layout = html.Div([
                                         
                                 ], style={'height': tab_height}),
                                 html.Div(id="output_loading"),
-                                dcc.Store(id='store_parkrunner', data=None)
+                                
+                                dcc.Store(id='store_parkrunner'),
+                                
                             ],
                             type="circle",
                             color=parkrun_purple,

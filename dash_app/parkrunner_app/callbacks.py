@@ -6,7 +6,9 @@ import numpy as np
 import json
 
 import dash
-from dash import  dcc, html, Input, Output, State, dash_table
+from dash import dash_table
+from dash_extensions.enrich import dcc, ServersideOutput, html, Input, Output, State
+
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
@@ -21,9 +23,13 @@ from dash_app.parkrunner_app.global_scheme import parkrun_purple, parkrun_purple
 
 def register_callbacks(app):
 
+    # Note - don't do @app.callback here. DashProxy() runs into duplicate callback output errors
+    # from dash import callback
+    from dash_extensions.enrich import callback
+
     #################################   Load data   #################################
-    @app.callback(
-        Output("store_parkrunner", "data"),
+    @callback(
+        ServersideOutput("store_parkrunner", "data"),
         Input('input_ok_athlete_id', 'n_clicks'),
         State('input_athlete_id', 'value'),
         prevent_initial_call=True
@@ -33,17 +39,24 @@ def register_callbacks(app):
         if n_clicks:
             parkrunner = Parkrunner(athlete_id)
 
-            # TODO - check if can do ServersideOutput - may not need to serialise
-            # dcc.Store needs to serialise what it's storing
-            # As class is complex, use pickle to serialise and base64 to encode/decode the 'bytes' object
-            # returned by pickle
-            serialised_parkrunner = pickle.dumps(parkrunner)
-            encoded_parkrunner = base64.b64encode(serialised_parkrunner).decode('utf-8')
-        return encoded_parkrunner
+            all_results = parkrunner.tables["all_results"]
+            all_results_dld = parkrunner.tables['all_results_dld']
+            other_info = parkrunner.other_info
+            summary_stats = parkrunner.tables['summary_stats']
+
+            # If need to JSON serialise the parkrunner class:
+            # serialised_parkrunner = pickle.dumps(parkrunner)
+            # encoded_parkrunner = base64.b64encode(serialised_parkrunner).decode('utf-8')
+
+            # To decode:
+            # decoded_parkrunner = base64.b64decode(encoded_parkrunner)
+            # parkrunner = pickle.loads(decoded_parkrunner)
+
+        return parkrunner
 
 
     #################################   Update outputs   #################################
-    @app.callback(
+    @callback(
         [
             Output("output_loading", "children"),
 
@@ -59,11 +72,13 @@ def register_callbacks(app):
 
             Output('output_locations_map', 'children')
         ],
-        Input('store_parkrunner', 'modified_timestamp'),
-        State('store_parkrunner', 'data'),
+        [
+            Input('store_parkrunner', 'modified_timestamp'),
+            Input('store_parkrunner', 'data')
+        ],            
         prevent_initial_call=True
     )
-    def update_outputs(ts, encoded_parkrunner):
+    def update_outputs(ts, parkrunner):
         """Update everything"""
         if ts is None:
             raise dash.exceptions.PreventUpdate
@@ -72,19 +87,22 @@ def register_callbacks(app):
             if ctx.triggered:
                 prop_id = ctx.triggered[0]['prop_id']
                 if prop_id == 'store_parkrunner.modified_timestamp':
-                    decoded_parkrunner = base64.b64decode(encoded_parkrunner)
-                    parkrunner = pickle.loads(decoded_parkrunner)
+
+                    all_results = parkrunner.tables["all_results"]
+                    all_results_dld = parkrunner.tables['all_results_dld']
+                    other_info = parkrunner.other_info
+                    summary_stats = parkrunner.tables['summary_stats']
 
                     ###### Parkrunner info ######
-                    info = parkrunner.other_info
+                    info = other_info
 
                     name = f'Parkrunner: {info["athlete_name"]}'
                     age_category = f'Last updated age category: {info["last_age_category"]}'
-                    nbr_parkruns = f'Parkrun attendances: {info["nbr_parkruns"]} parkruns @ {parkrunner.tables["all_results"].Event.nunique()} locations'
+                    nbr_parkruns = f'Parkrun attendances: {info["nbr_parkruns"]} parkruns @ {all_results_dld.Event.nunique()} locations'
 
                     ###### Tables ######
                     summary_stats = (
-                        parkrunner.tables['summary_stats']
+                        summary_stats
                             .set_index('Unnamed: 0')
                             .T
                             .reset_index(drop=False)
@@ -103,7 +121,7 @@ def register_callbacks(app):
                         )
                     ])
 
-                    recent_parkruns = parkrunner.tables['all_results_dld']
+                    recent_parkruns = all_results_dld
                     tbl_recent_parkruns = html.Div([
                         html.H6("All parkrun results"),
                         dash_table.DataTable(
@@ -149,7 +167,6 @@ def register_callbacks(app):
 
                     ###### Charts ######
                     fig_finishing_times = parkrunner.plot_finishing_times()
-                    fig_boxplot_times = parkrunner.plot_boxplot_times_by_event(order_by="time")
                     fig_heatmap_attendance = parkrunner.plot_heatmap_mthly_attendance()
 
 
@@ -157,13 +174,13 @@ def register_callbacks(app):
                     # Get parkrun locations json and convert to geojson
                     features = get_parkrun_locations()
 
-                    search_for = parkrunner.tables["all_results"].Event.unique()
+                    search_for = all_results.Event.unique()
                     keep_locations = []
                     for x in features:
                         if x["properties"]["EventShortName"] in search_for:
 
                             event = x["properties"]["EventShortName"]
-                            df = parkrunner.tables["all_results"]
+                            df = all_results
                             df = df[df.Event == event]
 
                             last_attendance = str(df['Run Date'].max().date())
@@ -218,7 +235,7 @@ def register_callbacks(app):
 
 
     # SUMMARY TAB: Download parkrun results
-    @app.callback(
+    @callback(
         Output('download_parkrun_results', 'data'),
         Input('dld_btn_parkrun_results', 'n_clicks'),
         State('store_parkrunner', 'data'),
@@ -234,13 +251,13 @@ def register_callbacks(app):
 
 
     # LOCATIONS BOXPLOT TAB: Order axis by
-    @app.callback(
+    @callback(
         Output('output_boxplot_times', 'figure'),
         Input('input_boxplot_order_by', 'value'),
         Input('store_parkrunner', 'modified_timestamp'),
-        State('store_parkrunner', 'data'),
+        Input('store_parkrunner', 'data'),
     )
-    def refresh_plot(order_by, ts, encoded_parkrunner):
+    def refresh_plot(order_by, ts, parkrunner):
 
         if ts is None:
             raise dash.exceptions.PreventUpdate
@@ -249,8 +266,6 @@ def register_callbacks(app):
             if ctx.triggered:
                 prop_id = ctx.triggered[0]['prop_id']
                 if prop_id in ['store_parkrunner.modified_timestamp', 'input_boxplot_order_by.value']:
-                    decoded_parkrunner = base64.b64decode(encoded_parkrunner)
-                    parkrunner = pickle.loads(decoded_parkrunner)
                     if order_by == "Most attendances":
                         BY = "events"
                     else:
