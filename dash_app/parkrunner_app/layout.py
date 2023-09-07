@@ -15,7 +15,7 @@ layout = html.Div([
         children=[
             html.Div(html.I(className="fa-solid fa-person-running", style={"font-size": "30px", "padding-right": "10px"}),
                      style={'display': 'inline-block'}),
-            html.Div(html.H4('Parkrun Dash', style={"vertical-align": "middle"}),
+            html.Div(html.H4('Parkrunner', style={"vertical-align": "middle"}),
                      style={'display': 'inline-block'})
 
         ],
@@ -45,12 +45,11 @@ layout = html.Div([
                             ),
                             html.Div(dbc.Label(":"), style={'display': 'inline-block'})
                         ]),
+                        html.Div(id="alert_wrong_id"),
                         dbc.Input(id="input_athlete_id",
                                 placeholder="Athlete ID e.g. 4360023",
                                 style={"width": "400px"}),
                         html.P(""),
-                        # dbc.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
-                        #             style={"width": "100px"})
                         html.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
                                     style={"width": "100px"})
                     ], style={"width": "90%", "padding": "20px", 'min-height':'35vh'}
