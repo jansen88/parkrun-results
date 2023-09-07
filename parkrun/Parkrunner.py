@@ -1,11 +1,3 @@
-# Last updated: 2023-08-26
-# Dev notes -
-# 1. returns a lot of warnings right now
-# e.g. A value is trying to be set on a copy of a slice from a DataFrame.
-# Try using .loc[row_indexer,col_indexer] = value instead
-# 2. Find better function names!!!
-
-
 # libs -----------------------------------------------
 import requests
 import numpy as np
@@ -410,53 +402,3 @@ class Parkrunner():
         for i, point in a.iterrows():
             # NOTE - assumes x axis is datetime - Run Date
             ax.text(point['x'] + datetime.timedelta(days=4), point['y'], str(point['val']))
-
-# END Parkrun class
-
-
-# test  --------------------------------------------
-
-# athlete_id = '2587116'
-# parkrunner = Parkrunner(athlete_id)
-
-# # print(parkrunner.tables)
-# # print(parkrunner.other_info)
-
-# parkrunner.plot_finishing_times(
-#     show_num_events = 25,
-#     # filter_parkrun = 'Rhodes',
-#     show_PB_only = True
-# )
-
-# parkrunner.plot_boxplot_times_by_event(
-#     order_by = "time"
-# )
-
-# parkrunner.plot_heatmap_mthly_attendance()
-
-
-# temp archive ---
-        # # build plot
-        # fig = plt.figure()
-
-        # sns.lineplot(x="Run Date", y="Time_numeric", data=df,
-        #              linewidth=1.5, linestyle='--',
-        #              color='grey', legend=False)
-        # sns.scatterplot(x='Run Date', y='PB_times_numeric', data=df,
-        #                 s=120, facecolor='white', edgecolor='black', linewidth=1.5)
-        # sns.scatterplot(x='Run Date', y='Time_numeric', data=df,
-        #                 hue='Event', s=80, ec=None)
-        # self._label_point(df_pb['Run Date'], df_pb['PB_times_numeric'], df_pb['PB_times'], plt.gca())
-
-        # plt.xlabel('Run date')
-        # plt.ylabel('Finishing time (mins)')
-        # plt.legend(title='Event location')
-        # plt.title(f"Parkrun finish times")
-        # ax = plt.gca()
-        # ax.set_ylim(ax.get_ylim()[::-1])
-
-
-
-
-
-

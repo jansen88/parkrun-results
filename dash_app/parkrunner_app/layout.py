@@ -1,14 +1,13 @@
-import dash_core_components as dcc
-import dash_html_components as html
-# from dash_app.dash_shared import shared_dash_nav_links
-from dash import Dash, dcc, html, Input, Output, State, dash_table
+from dash_extensions.enrich import dcc, html
+
 import dash_bootstrap_components as dbc
+
 import dash_daq as daq
 
 from dash_app.parkrunner_app.global_scheme import HEADER_STYLE, SIDEBAR_STYLE, CONTENT_STYLE,\
-      parkrun_purple, parkrun_purple_lighter
+      parkrun_purple, parkrun_purple_lighter, tab_height
 
-tab_height = '5vh'
+
 
 layout = html.Div([
     ################ Header ################
@@ -16,7 +15,7 @@ layout = html.Div([
         children=[
             html.Div(html.I(className="fa-solid fa-person-running", style={"font-size": "30px", "padding-right": "10px"}),
                      style={'display': 'inline-block'}),
-            html.Div(html.H4('Parkrun Dash', style={"vertical-align": "middle"}),
+            html.Div(html.H4('Parkrunner', style={"vertical-align": "middle"}),
                      style={'display': 'inline-block'})
 
         ],
@@ -46,6 +45,7 @@ layout = html.Div([
                             ),
                             html.Div(dbc.Label(":"), style={'display': 'inline-block'})
                         ]),
+                        html.Div(id="alert_wrong_id"),
                         dbc.Input(id="input_athlete_id",
                                 placeholder="Athlete ID e.g. 4360023",
                                 style={"width": "400px"}),
@@ -153,7 +153,9 @@ layout = html.Div([
                                         
                                 ], style={'height': tab_height}),
                                 html.Div(id="output_loading"),
-                                dcc.Store(id='store_parkrunner', data=None)
+                                
+                                dcc.Store(id='store_parkrunner'),
+                                
                             ],
                             type="circle",
                             color=parkrun_purple,

@@ -4,3 +4,6 @@
 # .pyc files in pycache
  __pycache__/
 *.pyc 
+
+# file_system_store
+file_system_store/

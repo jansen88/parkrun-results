@@ -3,6 +3,8 @@ sidebar_width = "12vw"
 parkrun_purple = "#2b233d"
 parkrun_purple_lighter = "#d1cae1" #"#afa3ca"
 
+tab_height = '5vh'
+
 HEADER_STYLE = {
     "position": "fixed",
     "top": 0,
