@@ -47,12 +47,12 @@ layout = html.Div([
                             ),
                             html.Div(dbc.Label(":"), style={'display': 'inline-block'})
                         ]),
-                        html.Div(id="alert_wrong_id"),
-                        dbc.Input(id="input_athlete_id",
+                        html.Div(id="alert-wrong-id"),
+                        dbc.Input(id="input-athlete-id",
                                 placeholder="Athlete ID e.g. 4360023",
                                 style={"width": "400px"}),
                         html.P(""),
-                        html.Button('Submit', id='input_ok_athlete_id', n_clicks=0,
+                        html.Button('Submit', id='input-ok-athlete-id', n_clicks=0,
                                     style={"width": "100px"})
                     ], style={"width": "90%", "padding": "20px", 'min-height':'35vh'}
                     )
@@ -69,14 +69,14 @@ layout = html.Div([
                                     ################ Summary tab ################
                                     dcc.Tab([
                                                 html.P(""),
-                                                html.H4(id='output_name'),
-                                                html.Div(id='output_age_category'),
-                                                html.Div(id='output_nbr_parkruns'),
+                                                html.H4(id='output-name'),
+                                                html.Div(id='output-age-category'),
+                                                html.Div(id='output-nbr-parkruns'),
                                                 html.P(""),
 
-                                                html.Div(id='output_summary_stats', style={'width': '45%'}),
+                                                html.Div(id='output-summary-stats', style={'width': '45%'}),
                                                 html.P(""),
-                                                html.Div(id='output_recent_parkruns', style={'width': '80%'})
+                                                html.Div(id='output-recent-parkruns', style={'width': '80%'})
                                             ],
                                             label="Parkrunner summary",
                                             style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
@@ -90,7 +90,7 @@ layout = html.Div([
                                             dbc.Label("This plot shows how this parkrunner's finishing times have improved over time."),
                                             html.Br(),
                                             dbc.Label("Use the buttons and filters to zoom into the interactive plot below:"),
-                                            dcc.Graph(id='output_finishing_times')
+                                            dcc.Graph(id='output-finishing-times')
                                         ], 
                                         label="Parkrun results over time",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
@@ -107,7 +107,7 @@ layout = html.Div([
                                                         dcc.Dropdown(
                                                             ["Best times", "Most attendances"],
                                                             value="Best times",
-                                                            id="input_boxplot_order_by",
+                                                            id="input-boxplot-order-by",
                                                             clearable=False,
                                                             style={"width": "300px"}
                                                         ),
@@ -122,7 +122,7 @@ layout = html.Div([
                                             dbc.Label("This plot provides insights into this parkrunner's favourite and fastest parkruns."),
                                             html.Br(),
                                             dbc.Label("Use the filters to zoom into the interactive plot below:"),
-                                            dcc.Graph(id='output_boxplot_times')
+                                            dcc.Graph(id='output-boxplot-times')
                                         ],
                                         label="Top parkrun locations",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
@@ -136,7 +136,7 @@ layout = html.Div([
                                             html.H6("Parkrun locations"),
                                             dbc.Label("This interactive map shows the geographical locations of all the parkruns this parkrunner has attended:"),
                                             
-                                            html.Div(id="output_locations_map"),
+                                            html.Div(id="output-locations-map"),
                                         ],
                                         label = "Locations map",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
@@ -148,16 +148,16 @@ layout = html.Div([
                                             html.P(""),
                                             html.H6("Parkrun location attendance"),
                                             dbc.Label("This plot illustrates how consistently this parkrunner attends parkruns:"),
-                                            dcc.Graph(id='output_heatmap_attendance')
+                                            dcc.Graph(id='output-heatmap-attendance')
                                         ],
                                         label="Parkrun attendance",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
                                     ),
                                         
                                 ], style={'height': tab_height}),
-                                html.Div(id="output_loading"),
+                                html.Div(id="output-loading"),
                                 
-                                dcc.Store(id='store_parkrunner')
+                                dcc.Store(id='store-parkrunner')
                                 
                             ],
                             type="circle",

@@ -29,10 +29,10 @@ def register_callbacks(app):
 
     #################################   Load data   #################################
     @callback(
-        Output("store_parkrunner", "data"),
-        Output("alert_wrong_id","children"),
-        Input('input_ok_athlete_id', 'n_clicks'),
-        State('input_athlete_id', 'value'),
+        Output("store-parkrunner", "data"),
+        Output("alert-wrong-id","children"),
+        Input('input-ok-athlete-id', 'n_clicks'),
+        State('input-athlete-id', 'value'),
         prevent_initial_call=True
     )
     def update_parkrunner(n_clicks, athlete_id):
@@ -68,16 +68,16 @@ def register_callbacks(app):
 
     @callback(
         [
-            Output("output_loading", "children"),
+            Output("output-loading", "children"),
 
-            Output('output_name', 'children'),
-            Output('output_age_category', 'children'),
-            Output('output_nbr_parkruns', 'children'),
+            Output('output-name', 'children'),
+            Output('output-age-category', 'children'),
+            Output('output-nbr-parkruns', 'children'),
 
-            Output('output_summary_stats', 'children'),
-            Output('output_recent_parkruns', 'children')
+            Output('output-summary-stats', 'children'),
+            Output('output-recent-parkruns', 'children')
         ],
-        Input('store_parkrunner', 'data'),
+        Input('store-parkrunner', 'data'),
 
         prevent_initial_call=True
     )
@@ -164,9 +164,9 @@ def register_callbacks(app):
 
     # SUMMARY TAB: Download parkrun results
     @callback(
-        Output('download_parkrun_results', 'data'),
-        Input('dld_btn_parkrun_results', 'n_clicks'),
-        State('store_parkrunner', 'data'),
+        Output('download-parkrun_results', 'data'),
+        Input('dld-btn-parkrun_results', 'n_clicks'),
+        State('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def download_tbl_parkrun_results(n_clicks, parkrunner):
@@ -181,8 +181,8 @@ def register_callbacks(app):
     #################################   Finishing times plot tab   #################################
 
     @callback(
-        Output('output_finishing_times', 'figure'),
-        Input('store_parkrunner', 'data'),
+        Output('output-finishing-times', 'figure'),
+        Input('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def render_parkrunner_results_plot(parkrunner):
@@ -191,9 +191,9 @@ def register_callbacks(app):
 
     #################################   Locations box plot tab   #################################
     @callback(
-        Output('output_boxplot_times', 'figure'),
-        Input('input_boxplot_order_by', 'value'),
-        Input('store_parkrunner', 'data'),
+        Output('output-boxplot-times', 'figure'),
+        Input('input-boxplot-order-by', 'value'),
+        Input('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def render_parkrunner_locations_boxplot(by, parkrunner):
@@ -206,8 +206,8 @@ def register_callbacks(app):
     #################################   Map tab  #################################
 
     @callback(
-        Output('output_locations_map', 'children'),
-        Input('store_parkrunner', 'data'),
+        Output('output-locations-map', 'children'),
+        Input('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def render_parkrunner_map(parkrunner):
@@ -271,8 +271,8 @@ def register_callbacks(app):
     #################################  Attendance heatmap tab  #################################
 
     @callback(
-        Output('output_heatmap_attendance', 'figure'),
-        Input('store_parkrunner', 'data'),
+        Output('output-heatmap-attendance', 'figure'),
+        Input('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def render_parkrunner_attendance_heatmap(parkrunner):
