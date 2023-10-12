@@ -1,13 +1,11 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
 # Jupyter Notebook
 .ipynb_checkpoints
 
 # .pyc files in pycache
  __pycache__/
 *.pyc 
+dash_app/__pycache__/
+parkrun/__pycache__/
 
 # file_system_store
 file_system_store/
