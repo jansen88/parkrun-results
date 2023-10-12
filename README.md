@@ -3,6 +3,9 @@
 ## About
 Repository for scraping, exploring and visualising parkrun results
 
+## Setup
+
+
 ## Features
 Primary output is a Dash web app - see sample screenshots below
 

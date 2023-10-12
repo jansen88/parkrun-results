@@ -7,7 +7,7 @@ import json
 
 import dash
 from dash import dash_table
-from dash_extensions.enrich import dcc, ServersideOutput, html, Input, Output, State
+from dash_extensions.enrich import dcc, html, Input, Output, State, Serverside #ServersideOutput
 
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
@@ -29,7 +29,7 @@ def register_callbacks(app):
 
     #################################   Load data   #################################
     @callback(
-        ServersideOutput("store_parkrunner", "data"),
+        Output("store_parkrunner", "data"),
         Output("alert_wrong_id","children"),
         Input('input_ok_athlete_id', 'n_clicks'),
         State('input_athlete_id', 'value'),
@@ -61,7 +61,7 @@ def register_callbacks(app):
             # decoded_parkrunner = base64.b64decode(encoded_parkrunner)
             # parkrunner = pickle.loads(decoded_parkrunner)
 
-        return parkrunner, error_alert
+        return Serverside(parkrunner), error_alert
 
 
     #################################   Summary tab   #################################
@@ -83,7 +83,6 @@ def register_callbacks(app):
     )
     def render_parkrunner_summary_tab(parkrunner):
         """Update summary tab"""
-
         all_results_dld = parkrunner.tables['all_results_dld']
         other_info = parkrunner.other_info
         summary_stats = parkrunner.tables['summary_stats']
@@ -172,9 +171,11 @@ def register_callbacks(app):
     )
     def download_tbl_parkrun_results(n_clicks, parkrunner):
         if n_clicks and parkrunner:
-            return dcc.send_data_frame(parkrunner.tables['all_results_dld'].to_csv,
-                                       filename="All Results.csv",
-                                       index=False)
+            return dcc.send_data_frame(
+                                        parkrunner.tables['all_results_dld'].to_csv,
+                                        filename="All Results.csv",
+                                        index=False
+                                    )
         
 
     #################################   Finishing times plot tab   #################################
