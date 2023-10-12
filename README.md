@@ -3,6 +3,17 @@
 ## About
 Repository for scraping, exploring and visualising parkrun results
 
+## Setup
+Install requirements:
+```
+pip install -r requirements.txt
+```
+
+To run app locally:
+```
+python app.py
+```
+
 ## Features
 Primary output is a Dash web app - see sample screenshots below
 
