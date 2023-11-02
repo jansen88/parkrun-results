@@ -21,6 +21,7 @@ numpy = "^1.24.3"
 pandas = "^1.5.3"
 plotly = "^5.9.0"
 requests = "^2.31.0"
+typing-extensions = "^4.8.0"
 
 
 [build-system]
