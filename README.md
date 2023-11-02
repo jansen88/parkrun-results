@@ -4,7 +4,11 @@
 Repository for scraping, exploring and visualising parkrun results
 
 ## Setup
-Install requirements:
+Install requirements - poetry or pip both should be up to date:
+```
+poetry install
+```
+
 ```
 pip install -r requirements.txt
 ```

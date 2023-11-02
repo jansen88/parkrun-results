@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "parkrun-results"
+version = "0.1.0"
+description = ""
+authors = ["Jansen Zhang <94953297+jansen-zhang20@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+dash = "^2.14.0"
+dash-bootstrap-components = "^1.5.0"
+dash-core-components = "^2.0.0"
+dash-daq = "^0.5.0"
+dash-extensions = "^1.0.4"
+dash-html-components = "^2.0.0"
+dash-leaflet = "^1.0.11"
+flask = "^2.2.2"
+geopandas = "^0.14.0"
+matplotlib = "^3.7.1"
+numpy = "^1.24.3"
+pandas = "^1.5.3"
+plotly = "^5.9.0"
+requests = "^2.31.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
