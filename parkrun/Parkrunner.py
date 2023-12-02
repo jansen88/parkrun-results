@@ -119,7 +119,7 @@ class Parkrunner:
                 "<h2>",
                 '\xa0<span style="font-weight: normal;" title="parkrun ID"',
             ],
-            "milestone_club": ["Member of the parkrun", "Club"],
+            # "milestone_club": ["Member of the parkrun", "Club"],
             "nbr_parkruns": ["<h3>\n", "parkruns total"],
             "last_age_category": ["Most recent age category was ", "\n"],
         }
