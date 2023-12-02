@@ -6,7 +6,7 @@
 * [Setup](https://github.com/jansen88/parkrun-results/tree/master#setup)
 
 ## 🔎 About
-Parkrun is a global free community running event held every Saturday, which welcomes participants to run 5km together over a designated course. Parkrunners are encouraged to walk, jog, run or race at their own pace, and draws participants of all ages from competitive runners, families and retirees. Parkrun is a global phenomena, originating from the UK with hundreds of parkruns now being hosted weekly across Europe, USA, Africa, Australia and Asia. 
+[Parkrun](https://www.parkrun.com.au/) is a global free community running event held every Saturday, which welcomes participants to run 5km together over a designated course. Parkrunners are encouraged to walk, jog, run or race at their own pace, and draws participants of all ages from competitive runners, families, youths to retirees. Parkrun is a global phenomenon, originating from the UK with hundreds of parkruns now being hosted weekly across Europe, USA, Africa, Australia and Asia. 
 
 This Dash web app enables users to visualise and explore parkrun results for specified parkrunners. The functionality allows parkrunners to track and visualise their results over time and explore their favourite parkruns/attendance.
 
