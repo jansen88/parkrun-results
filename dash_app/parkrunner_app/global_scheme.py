@@ -1,4 +1,7 @@
 header_height = "4rem"
+content_height = "90vh"
+footer_position = "96vh"
+footer_height = "4vh"
 sidebar_width = "12vw"
 parkrun_purple = "#2b233d"
 parkrun_purple_lighter = "#d1cae1" #"#afa3ca"
@@ -29,9 +32,19 @@ SIDEBAR_STYLE = {
 CONTENT_STYLE = {
     "position": "fixed",
     "top": header_height,
-    "height": "90vh",
+    "height": content_height,
     "width": "100vw",
     # "margin-left": sidebar_width,
     "padding": "1rem 1rem",
     "overflowY": "scroll"
+}
+
+FOOTER_STYLE = {
+    "position": "fixed",
+    "top": footer_position,
+    "left": 0,
+    "right": 0,
+    "height": footer_height,
+    "padding": "1rem 1rem",
+    # "background-color": parkrun_purple_lighter,
 }

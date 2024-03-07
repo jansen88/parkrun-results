@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 
 import dash_daq as daq
 
-from dash_app.parkrunner_app.global_scheme import HEADER_STYLE, SIDEBAR_STYLE, CONTENT_STYLE,\
+from dash_app.parkrunner_app.global_scheme import HEADER_STYLE, SIDEBAR_STYLE, CONTENT_STYLE, FOOTER_STYLE, \
     parkrun_purple, parkrun_purple_lighter, tab_height
 
 
@@ -16,8 +16,7 @@ layout = html.Div([
             html.Div(html.I(className="fa-solid fa-person-running", style={"font-size": "30px", "padding-right": "10px"}),
                     style={'display': 'inline-block'}),
             html.Div(html.H4('Parkrunner', style={"vertical-align": "middle"}),
-                    style={'display': 'inline-block'})
-
+                    style={'display': 'inline-block'}),
         ],
         style=HEADER_STYLE
     ),
@@ -169,5 +168,19 @@ layout = html.Div([
             ])
         ],
         style=CONTENT_STYLE
-    )
+    ),
+
+    # ################ Footer ################
+    # html.Div(
+    #     children=[
+    #         dbc.Row(
+    #             [
+    #                 html.A("GitHub", href='https://github.com/jansen88/parkrun-results', target="_blank",
+    #                     style={"color": "grey"})
+    #             ], style={"width": "100%", "display": "flex", "align-items":"center", "justify-content":"center"}
+    #         )
+    #     ],
+    #     style=FOOTER_STYLE
+    # ),
+
 ])
