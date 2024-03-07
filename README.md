@@ -3,7 +3,7 @@
 ## 📖 Contents
 * [About](https://github.com/jansen88/parkrun-results/tree/master#about)
 * [Examples](https://github.com/jansen88/parkrun-results/tree/master#examples)
-* [Developer's notes](https://github.com/jansen88/parkrun-results/tree/master#examples)
+* [Developer's notes](https://github.com/jansen88/parkrun-results/tree/master#developers-notes)
 * [Setup](https://github.com/jansen88/parkrun-results/tree/master#setup)
 
 ## 📝 About
