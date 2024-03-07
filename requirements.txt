@@ -1,12 +1,11 @@
 # from requirements.in - couldn't resolve conflicts so edited by hand
-dash==2.14.1
-dash_bootstrap_components==1.5.0
-dash_extensions==1.0.14
-dash_leaflet==1.0.11
-Flask==2.2.2
-matplotlib==3.7.1
-numpy==1.25.2
-pandas==1.5.3
-plotly==5.18.0
-Requests==2.31.0
-seaborn==0.13.2
+# FIXME - resolve conflicts and versions later
+dash
+dash_bootstrap_components
+dash_extensions
+dash_leaflet
+Flask
+numpy
+pandas
+plotly
+Requests

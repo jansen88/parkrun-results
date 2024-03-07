@@ -3,10 +3,7 @@ import requests
 import numpy as np
 import pandas as pd
 import re
-import matplotlib.pyplot as plt
-import seaborn as sns
 import datetime
-from itertools import product
 
 import plotly.express as px
 import plotly.graph_objs as go
