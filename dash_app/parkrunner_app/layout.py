@@ -42,14 +42,14 @@ layout = html.Div([
                                     style={'display': 'inline-block'}
                             ),
                             dbc.Tooltip(
-                                "Search using parkrun ID - e.g. 4360023 - as parkrunners are not currently searchable by name.",
+                                "Search using parkrun ID - e.g. 7417035 (remove any prefix e.g. 'A') - as parkrunners are not currently searchable by name. Your parkrun ID can be found on your barcode or your profile page. ",
                                 target="tooltip_parkrunner_search",
                             ),
                             html.Div(dbc.Label(":"), style={'display': 'inline-block'})
                         ]),
                         html.Div(id="alert-wrong-id"),
                         dbc.Input(id="input-athlete-id",
-                                placeholder="Athlete ID e.g. 4360023",
+                                placeholder="Athlete ID e.g. 7417035",
                                 style={"width": "400px"}),
                         html.P(""),
                         html.Button('Submit', id='input-ok-athlete-id', n_clicks=0,
@@ -78,7 +78,7 @@ layout = html.Div([
                                                 html.P(""),
                                                 html.Div(id='output-recent-parkruns', style={'width': '80%'})
                                             ],
-                                            label="Parkrunner summary",
+                                            label="Summary",
                                             style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
                                             ),
                                             
@@ -92,7 +92,7 @@ layout = html.Div([
                                             dbc.Label("Use the buttons and filters to zoom into the interactive plot below:"),
                                             dcc.Graph(id='output-finishing-times')
                                         ], 
-                                        label="Parkrun results over time",
+                                        label="Results over time",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
                                     ),
 
@@ -124,7 +124,7 @@ layout = html.Div([
                                             dbc.Label("Use the filters to zoom into the interactive plot below:"),
                                             dcc.Graph(id='output-boxplot-times')
                                         ],
-                                        label="Top parkrun locations",
+                                        label="Top event locations",
                                         style={'padding': '0','line-height': tab_height},selected_style={'padding': '0','line-height': tab_height}
                                     ),
 

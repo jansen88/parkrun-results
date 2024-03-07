@@ -153,8 +153,8 @@ def register_callbacks(app):
                 style_cell={'font-family': "Segoe UI"}
             ),
 
-            html.Button("Download as CSV", id="dld_btn_parkrun_results"),
-            dcc.Download(id="download_parkrun_results")
+            html.Button("Download as CSV", id="dld-btn-parkrun-results"),
+            dcc.Download(id="download-results-csv")
         ])
 
         return "", \
@@ -164,18 +164,15 @@ def register_callbacks(app):
 
     # SUMMARY TAB: Download parkrun results
     @callback(
-        Output('download-parkrun_results', 'data'),
-        Input('dld-btn-parkrun_results', 'n_clicks'),
+        Output('download-results-csv', 'data'),
+        Input('dld-btn-parkrun-results', 'n_clicks'),
         State('store-parkrunner', 'data'),
         prevent_initial_call=True
     )
     def download_tbl_parkrun_results(n_clicks, parkrunner):
         if n_clicks and parkrunner:
-            return dcc.send_data_frame(
-                                        parkrunner.tables['all_results_dld'].to_csv,
-                                        filename="All Results.csv",
-                                        index=False
-                                    )
+            df = parkrunner.tables['all_results_dld']
+            return dcc.send_data_frame(df.to_csv, f"results-{parkrunner.athlete_id}.csv", index=False)
         
 
     #################################   Finishing times plot tab   #################################
