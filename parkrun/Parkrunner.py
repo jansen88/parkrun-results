@@ -38,7 +38,7 @@ class Parkrunner:
         :param raw_results: Raw scraped output from self.scrape_data()
         :return: Dictionary of summary statistics, annual bests and all results
         """
-        # scrape tables
+        # scrape tables        
         scraped_tables = pd.read_html(raw_results.text)
         tables_map = {
             # table : table number (index)
