@@ -2,8 +2,6 @@ from dash_extensions.enrich import dcc, html
 
 import dash_bootstrap_components as dbc
 
-import dash_daq as daq
-
 from dash_app.parkrunner_app.global_scheme import HEADER_STYLE, SIDEBAR_STYLE, CONTENT_STYLE, FOOTER_STYLE, \
     parkrun_purple, parkrun_purple_lighter, tab_height
 

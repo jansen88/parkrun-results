@@ -1,11 +1,6 @@
-import io
-import base64
-import pickle
 import pandas as pd
 import numpy as np
-import json
 
-import dash
 from dash import dash_table
 from dash_extensions.enrich import dcc, html, Input, Output, State, Serverside #ServersideOutput
 
@@ -13,8 +8,6 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 from dash_extensions.javascript import assign, Namespace
-
-import geopandas as gpd
 
 from parkrun.Parkrunner import Parkrunner
 from parkrun.load_data import get_parkrun_locations
