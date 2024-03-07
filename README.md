@@ -20,13 +20,15 @@ See sample screenshots below:
 ![image](https://github.com/jansen88/parkrunFun/assets/94953297/aac129ad-3e50-42b6-9c50-4257d2fffe10)
 
 ## 🔧 Setup
-Install requirements - poetry or requirements.txt both should be up to date:
-```
-poetry install
-```
+Install requirements - requirements.txt should be more up to date:
 
 ```
 pip install -r requirements.txt
+```
+
+Poetry is out of date - do not use:
+```
+poetry install
 ```
 
 To run app locally:

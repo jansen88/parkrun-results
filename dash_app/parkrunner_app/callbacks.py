@@ -76,6 +76,8 @@ def register_callbacks(app):
     )
     def render_parkrunner_summary_tab(parkrunner):
         """Update summary tab"""
+        print(parkrunner)
+        
         all_results_dld = parkrunner.tables['all_results_dld']
         other_info = parkrunner.other_info
         summary_stats = parkrunner.tables['summary_stats']
