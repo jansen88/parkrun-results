@@ -7,7 +7,7 @@
 * [🔧 Setup](https://github.com/jansen88/parkrun-results/tree/master#setup)
 
 ## ℹ️ About
-[Parkrun](https://www.parkrun.com.au/), a worldwide community running event held every Saturday morning, invites participants to collectively cover a 5km courses in community park venues. Embracing individuals of all ages and fitness levels, from competitive runners and families to youths and retirees, Parkrun encourages participants to walk, jog, run, or race at their own pace. Originating in the UK, this global phenomenon has expanded to include hundreds of weekly parkruns across Europe, the USA, Africa, Australia, and Asia.
+[Parkrun](https://www.parkrun.com.au/), a worldwide community running event held every Saturday morning, invites participants to run together to cover a 5km courses in community park venues. Embracing individuals of all ages and fitness levels, from competitive runners and families to youths and retirees, Parkrun encourages participants to walk, jog, run, or race at their own pace. Originating in the UK, this global phenomenon hosts hundreds of weekly parkruns across Europe, USA, Africa, Australia, and Asia.
 
 This Dash web application enables users to visualize and deep-dive into parkrun results for specific parkrunners. The interface allows parkrunners to monitor and visualize their performance trends over time, while exploring details about their top parkrun locations and attendance.
 
