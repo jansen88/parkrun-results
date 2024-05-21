@@ -19,6 +19,7 @@ class Parkrunner:
     def __init__(self, athlete_id):
         self.athlete_id = athlete_id
 
+    def fetch_data(self):
         # scrape athlete data
         self.raw_scraped = self.scrape_data()
 
@@ -54,14 +55,14 @@ class Parkrunner:
         all_results["Run Date"] = pd.to_datetime(
             all_results["Run Date"], format="%d/%m/%Y"
         )
-        all_results["Time_numeric"] = all_results["Time"].apply(self._convert_time)
 
-        # TODO - point everything to use this
-        # TODO - may not work if time > 60mins
-        all_results["Time_time"] = pd.to_datetime("00:" + all_results["Time"]).dt.time
-        all_results["Time_datetime"] = pd.to_datetime(
-            "00:" + all_results["Time"]
-        )  # .dt.time
+        all_results["Time_numeric"] = all_results["Time"].apply(self._convert_time_to_numeric)
+        # FIXME - clean up, not sure why we had 2
+        all_results["Time_datetime"] =  pd.to_datetime(
+            all_results["Time"].apply(self._convert_time_to_string),
+            format="%H:%M:%S"
+        )
+        all_results["Time_time"] = all_results["Time_datetime"].dt.time
 
         all_results = all_results.sort_values("Run Date")
         all_results["Parkrun Number"] = (
@@ -282,7 +283,7 @@ class Parkrunner:
         df = df.assign(
             n_event=lambda x: x.groupby("Event")["Run Date"].transform("nunique"),
             Event_append=lambda x: x.Event + " [" + x.n_event.astype("str") + "]",
-            min_time=lambda x: x.groupby("Event")["Time_datetime"].transform("min"),
+            min_time=lambda x: x.groupby("Event")["Time_time"].transform("min"),
         )
         if order_by == "time":
             df = df.sort_values("min_time")
@@ -379,7 +380,7 @@ class Parkrunner:
             .agg(
                 count=("Run Date", "nunique"),
                 parkruns=("Event", lambda x: x.str.cat(sep=", ")),
-                times=("Time_time", lambda x: x.astype("str").str.cat(sep=", ")),
+                times=("Time_datetime", lambda x: x.astype("str").str.cat(sep=", ")),
             )
             .sort_values(["year", "month_int"])
             .reset_index()
@@ -426,9 +427,30 @@ class Parkrunner:
         return fig
 
     # helper functions -----
-    def _convert_time(self, mm_ss):
+    def _extract_time(self, time_str):
+        parts = time_str.split(':')
+        
+        hours = 0
+        minutes = 0
+        seconds = 0
+        
+        if len(parts) == 3:  # 'hh:mm:ss' format
+            hours, minutes, seconds = int(parts[0]), int(parts[1]), int(parts[2])
+        elif len(parts) == 2:  # 'mm:ss' format
+            minutes, seconds = int(parts[0]), int(parts[1])
+        else:
+            raise ValueError("Invalid time format")
+        
+        return hours, minutes, seconds
+
+    def _convert_time_to_numeric(self, time_str):
         """Helper function to convert mm:ss times to numeric"""
-        return int(mm_ss.split(":")[0]) + int(mm_ss.split(":")[1]) / 60
+        hours, minutes, seconds = self._extract_time(time_str)
+        return hours * 60 + minutes + seconds / 60
+
+    def _convert_time_to_string(self, time_str): 
+        hours, minutes, seconds = self._extract_time(time_str)
+        return f"{hours}:{minutes}:{seconds}"
 
     def _label_point(self, x, y, val, ax):
         """Helper function to add labels - assumes x axis is datetime (for Run Date)"""
