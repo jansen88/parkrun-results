@@ -33,6 +33,7 @@ def register_callbacks(app):
         if n_clicks:
             try:
                 parkrunner = Parkrunner(athlete_id)
+                parkrunner.fetch_data()
                 error_alert = ""
             except:
                 parkrunner = None
@@ -220,7 +221,7 @@ def register_callbacks(app):
 
                 last_attendance = str(df['Run Date'].max().date())
                 attendances = len(df)
-                fastest_time = str(df.Time_time.min())
+                fastest_time = str(df.Time_datetime.min())
 
                 add_text = f"Most recent attendance: {last_attendance}<br>Total attendances: {attendances}<br>Fastest time: {fastest_time} "
                 x['add_text'] = add_text
